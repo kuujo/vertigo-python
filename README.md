@@ -1,4 +1,4 @@
-vertigo-python
-==============
+Vertigo Python API
+==================
 
-Python API for Vert.igo - a distributed event processing framework for Vert.x
+Python API for [Vertigo](https://github.com/kuujo/vertigo)
