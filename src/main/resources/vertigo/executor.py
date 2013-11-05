@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import net.kuujo.vertigo.context.InstanceContext
-import net.kuujo.vertigo.feeder.DefaultBasicFeeder
-import net.kuujo.vertigo.feeder.DefaultPollingFeeder
-import net.kuujo.vertigo.feeder.DefaultStreamFeeder
+import net.kuujo.vertigo.rpc.DefaultBasicExecutor
+import net.kuujo.vertigo.rpc.DefaultPollingExecutor
+import net.kuujo.vertigo.rpc.DefaultStreamExecutor
 import net.kuujo.vertigo.messaging.JsonMessage
 import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
 
-class _AbstractFeeder(object):
+class _AbstractExecutor(object):
   """
-  An abstract feeder.
+  An abstract executor.
   """
   _handlercls = None
 
@@ -33,162 +33,162 @@ class _AbstractFeeder(object):
     else:
       context = net.kuujo.vertigo.context.InstanceContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
       org.vertx.java.platform.impl.JythonVerticleFactory.container.config().removeField('__context__')
-    self._feeder = self._handlercls(
+    self._executor = self._handlercls(
       org.vertx.java.platform.impl.JythonVerticleFactory.vertx,
       org.vertx.java.platform.impl.JythonVerticleFactory.container,
       context
     )
 
   def set_ack_timeout(self, timeout):
-    self._feeder.setAckTimeout(timeout)
+    self._executor.setAckTimeout(timeout)
 
   def get_ack_timeout(self):
-    return self._feeder.getAckTimeout()
+    return self._executor.getAckTimeout()
 
   ack_timeout = property(get_ack_timeout, set_ack_timeout)
 
   def set_max_queue_size(self, queue_size):
-    self._feeder.setMaxQueueSize(queue_size)
+    self._executor.setMaxQueueSize(queue_size)
 
   def get_max_queue_size(self):
-    return self._feeder.getMaxQueueSize()
+    return self._executor.getMaxQueueSize()
 
   max_queue_size = property(get_max_queue_size, set_max_queue_size)
 
   def set_auto_retry(self, retry):
-    self._feeder.setAutoRetry(retry)
+    self._executor.setAutoRetry(retry)
 
   def get_auto_retry(self):
-    return self._feeder.getAutoRetry()
+    return self._executor.getAutoRetry()
 
   auto_retry = property(get_auto_retry, set_auto_retry)
 
   def set_retry_attempts(self, attempts):
-    self._feeder.setRetryAttempts(attempts)
+    self._executor.setRetryAttempts(attempts)
 
   def get_retry_attempts(self):
-    return self._feeder.getRetryAttempts()
+    return self._executor.getRetryAttempts()
 
   retry_attempts = property(get_retry_attempts, set_retry_attempts)
 
   def queue_full(self):
     """
-    Indicates whether the feeder queue is full.
+    Indicates whether the executor queue is full.
     """
-    return self._feeder.queueFull()
+    return self._executor.queueFull()
 
   def start(self, handler=None):
     """
-    Starts the feeder.
+    Starts the executor.
     """
     if handler is not None:
-      self._feeder.start(StartHandler(handler, self))
+      self._executor.start(StartHandler(handler, self))
     else:
-      self._feeder.start()
+      self._executor.start()
 
-  def feed(self, data, tag=None, handler=None):
+  def execute(self, data, tag=None, handler=None):
     """
-    Feeds data to the network.
+    Executes rpc on the network.
     """
     if handler is not None:
       if tag is not None:
-        self._feeder.feed(self._convert_data(data), tag, FeedResultHandler(handler))
+        self._executor.execute(self._convert_data(data), tag, ExecuteResultHandler(handler))
       else:
-        self._feeder.feed(self._convert_data(data), FeedResultHandler(handler))
+        self._executor.execute(self._convert_data(data), ExecuteResultHandler(handler))
     else:
       if tag is not None:
-        self._feeder.feed(self._convert_data(data), tag)
+        self._executor.execute(self._convert_data(data), tag)
       else:
-        self._feeder.feed(self._convert_data(data))
+        self._executor.execute(self._convert_data(data))
     return self
 
   def _convert_data(self, data):
     return org.vertx.java.core.json.JsonObject(map_to_java(data))
 
-class BasicFeeder(_AbstractFeeder):
+class BasicExecutor(_AbstractExecutor):
   """
-  A basic feeder.
+  A basic executor.
   """
-  _handlercls = net.kuujo.vertigo.component.feeder.DefaultBasicFeeder
+  _handlercls = net.kuujo.vertigo.component.executor.DefaultBasicExecutor
 
-class PollingFeeder(_AbstractFeeder):
+class PollingExecutor(_AbstractExecutor):
   """
-  A polling feeder.
+  A polling executor.
   """
-  _handlercls = net.kuujo.vertigo.component.feeder.DefaultPollingFeeder
+  _handlercls = net.kuujo.vertigo.component.executor.DefaultPollingExecutor
 
-  def set_feed_delay(self, delay):
-    self._feeder.setFeedDelay(delay)
+  def set_execute_delay(self, delay):
+    self._executor.setExecuteDelay(delay)
 
-  def get_feed_delay(self):
-    return self._feeder.getFeedDelay()
+  def get_execute_delay(self):
+    return self._executor.getExecuteDelay()
 
-  feed_delay = property(get_feed_delay, set_feed_delay)
+  execute_delay = property(get_execute_delay, set_execute_delay)
 
-  def feed_handler(self, handler):
+  def execute_handler(self, handler):
     """
-    Registers a feed handler.
+    Registers a execute handler.
     """
-    self._feeder.feedHandler(FeedHandler(handler, self))
+    self._executor.executeHandler(ExecuteHandler(handler, self))
     return handler
 
-class StreamFeeder(_AbstractFeeder):
+class StreamExecutor(_AbstractExecutor):
   """
-  A stream feeder.
+  A stream executor.
   """
-  _handlercls = net.kuujo.vertigo.component.feeder.DefaultStreamFeeder
+  _handlercls = net.kuujo.vertigo.component.executor.DefaultStreamExecutor
 
   def full_handler(self, handler):
     """
     Registers a full handler.
     """
-    self._feeder.fullHandler(VoidHandler(handler))
+    self._executor.fullHandler(VoidHandler(handler))
     return handler
 
   def drain_handler(self, handler):
     """
     Registers a drain handler.
     """
-    self._feeder.drainHandler(VoidHandler(handler))
+    self._executor.drainHandler(VoidHandler(handler))
     return handler
 
 class StartHandler(org.vertx.java.core.AsyncResultHandler):
   """
   A start handler.
   """
-  def __init__(self, handler, feeder):
+  def __init__(self, handler, executor):
     self.handler = handler
-    self.feeder = feeder
+    self.executor = executor
 
   def handle(self, result):
     if result.succeeded():
-      self.handler(None, self.feeder)
+      self.handler(None, self.executor)
     else:
-      self.handler(result.cause(), self.feeder)
+      self.handler(result.cause(), self.executor)
 
-class FeedResultHandler(org.vertx.java.core.AsyncResultHandler):
+class ExecuteResultHandler(org.vertx.java.core.AsyncResultHandler):
   """
-  A feed result handler.
+  An execute result handler.
   """
   def __init__(self, handler):
     self.handler = handler
 
   def handle(self, result):
     if result.succeeded():
-      self.handler(None)
+      self.handler(None, result.result())
     else:
-      self.handler(result.cause())
+      self.handler(result.cause(), None)
 
-class FeedHandler(org.vertx.java.core.Handler):
+class ExecuteHandler(org.vertx.java.core.Handler):
   """
-  A feed handler.
+  An execute handler.
   """
-  def __init__(self, handler, feeder):
+  def __init__(self, handler, executor):
     self.handler = handler
-    self.feeder = feeder
+    self.executor = executor
 
-  def handle(self, feeder):
-    self.handler(self.feeder)
+  def handle(self, executor):
+    self.handler(self.executor)
 
 class VoidHandler(org.vertx.java.core.Handler):
   """

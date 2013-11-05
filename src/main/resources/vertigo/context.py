@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from definition import NetworkDefinition, ComponentDefinition
+import net.kuujo.vertigo.context.NetworkContext
+import org.vertx.java.core.json.JsonObject
+from core.javautils import map_from_java, map_to_java
 
 class _AbstractContext(object):
   """
@@ -24,31 +26,32 @@ class NetworkContext(_AbstractContext):
   """
   A network context.
   """
-  @property
-  def address(self):
-    return self._context.address()
+  @staticmethod
+  def from_dict(self, json):
+    """
+    Creates a network context from a dictionary.
+    """
+    return NetworkContext(net.kuujo.vertigo.context.NetworkContext.fromJson(org.vertx.java.core.json.JsonObject(map_to_java(json))))
 
   @property
-  def audit_address(self):
-    return self._context.auditAddress()
+  def address(self):
+    return self._context.getAddress()
 
   @property
   def broadcast_address(self):
-    return self._context.broadcastAddress()
+    return self._context.getBroadcastAddress()
 
   @property
-  def definition(self):
-    return NetworkDefinition(self._context.definition())
+  def auditors(self):
+    auditors = self._context.getAuditors()
+    iterator = auditors.iterator()
+    return [iterator.next() while iterator.hasNext()]
 
   @property
-  def contexts(self):
-    collection = self._context.contexts()
+  def components(self):
+    collection = self._context.getComponents()
     iterator = collection.iterator()
-    contexts = {}
-    while iterator.hasNext():
-      context = iterator.next()
-      contexts[context.name()] = ComponentContext(context)
-    return contexts
+    return [ComponentContext(iterator.next()) while iterator.hasNext()]
 
 class ComponentContext(_AbstractContext):
   """
@@ -56,34 +59,52 @@ class ComponentContext(_AbstractContext):
   """
   @property
   def address(self):
-    return self._context.address()
+    return self._context.getAddress()
 
   @property
-  def context(self):
-    return NetworkContext(self._context.context())
+  def type(self):
+    return self._context.getType()
 
   @property
-  def definition(self):
-    return ComponentDefinition(self._context.definition())
+  def is_module(self):
+    return self._context.isModule()
 
   @property
-  def workers(self):
-    collection = self._context.workerContexts()
+  def is_verticle(self):
+    return self._context.isVerticle()
+
+  @property
+  def module(self):
+    if self.is_module:
+      return self._context.getModule()
+
+  @property
+  def main(self):
+    if self.is_verticle:
+      return self._context.getMain()
+
+  @property
+  def config(self):
+    return map_from_java(self._context.config().toMap())
+
+  @property
+  def instances(self):
+    collection = self._context.getInstances()
     iterator = collection.iterator()
-    contexts = {}
-    while iterator.hasNext():
-      context = iterator.next()
-      contexts[context.address()] = WorkerContext(context)
-    return contexts
-
-class WorkerContext(_AbstractContext):
-  """
-  A worker context.
-  """
-  @property
-  def address(self):
-    return self._context.address()
+    return [InstanceContext(iterator.next()) while iterator.hasNext()]
 
   @property
-  def context(self):
-    return ComponentContext(self._context.context())
+  def network(self):
+    return NetworkContext(self._context.getNetwork())
+
+class InstanceContext(_AbstractContext):
+  """
+  An instance context.
+  """
+  @property
+  def id(self):
+    return self._context.id()
+
+  @property
+  def component(self):
+    return ComponentContext(self._context.getComponent())

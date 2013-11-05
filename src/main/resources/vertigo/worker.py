@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import net.kuujo.vertigo.context.WorkerContext
-import net.kuujo.vertigo.component.worker.BasicWorker
+import net.kuujo.vertigo.context.InstanceContext
+import net.kuujo.vertigo.worker.BasicWorker
 import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.Handler
 import org.vertx.java.core.AsyncResultHandler
@@ -28,7 +28,8 @@ class BasicWorker(object):
     if context is not None:
       context = context._context
     else:
-      context = net.kuujo.vertigo.context.WorkerContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config())
+      context = net.kuujo.vertigo.context.InstanceContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
+      org.vertx.java.platform.impl.JythonVerticleFactory.container.config().removeField('__context__')
     self._worker = net.kuujo.vertigo.component.worker.BasicWorker(
       org.vertx.java.platform.impl.JythonVerticleFactory.vertx,
       org.vertx.java.platform.impl.JythonVerticleFactory.container,

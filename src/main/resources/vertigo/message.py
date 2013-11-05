@@ -34,12 +34,20 @@ class Message(object):
     return self._message.parent()
 
   @property
+  def ancestor(self):
+    return self._message.ancestor()
+
+  @property
   def body(self):
     return self._body
 
   @property
   def tag(self):
     return self._message.tag()
+
+  @property
+  def auditor(self):
+    return self._message.auditor()
 
   def create_child(self, body, id=None, tag=None):
     """
@@ -55,3 +63,9 @@ class Message(object):
         return Message(self._message.createChild(org.vertx.java.core.json.JsonObject(map_to_java(body)), tag))
       else:
         return Message(self._message.createChild(org.vertx.java.core.json.JsonObject(map_to_java(body))))
+
+  def copy(self):
+    """
+    Copies the message.
+    """
+    return Message(self._message.copy())
