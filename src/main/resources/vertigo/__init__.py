@@ -11,17 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from definition import NetworkDefinition
+from network import Network
 from worker import BasicWorker
 from feeder import BasicFeeder, PollingFeeder, StreamFeeder
-from context import WorkerContext
-import org.vertx.java.platform.impl.JythonVerticleFactory.container
+from rpc import BasicExecutor, PollingExecutor, StreamExecutor
 
-def create_network(address=None, **options):
+def create_network(address):
   """
-  Creates a new network definition.
+  Creates a new network.
   """
-  return NetworkDefinition(address, **options)
+  return Network(address)
 
 def create_basic_feeder(context=None):
   """
@@ -41,10 +40,26 @@ def create_stream_feeder(context=None):
   """
   return StreamFeeder(context)
 
+def create_basic_executor(context=None):
+  """
+  Creates a basic executor.
+  """
+  return BasicExecutor(context)
+
+def create_polling_executor(context=None):
+  """
+  Creates a polling executor.
+  """
+  return PollingExecutor(context)
+
+def create_stream_executor(context=None):
+  """
+  Creates a stream executor.
+  """
+  return StreamExecutor(context)
+
 def create_worker(context=None):
   """
   Creates a basic worker.
   """
   return BasicWorker(context)
-
-context = WorkerContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config())

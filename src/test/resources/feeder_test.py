@@ -20,17 +20,17 @@ class FeederTestCase(TestCase):
   A feeder test case.
   """
   def _create_ack_network(self, feeder):
-    network = vertigo.create_network()
-    network.address = "test"
-    network.enable_acking()
-    network.from_verticle('test_feeder', feeder).to_verticle('test_worker', 'test_acking_worker.py')
+    network = vertigo.create_network('test')
+    network.acking = True
+    network.add_verticle('test_feeder', feeder)
+    network.add_verticle('test_worker', 'test_acking_worker.py').add_input('test_feeder')
     return network
 
   def _create_fail_network(self, feeder):
-    network = create_network()
-    network.address = "test"
-    network.enable_acking()
-    network.from_verticle('test_feeder', feeder).to_verticle('test_worker', 'test_failing_worker.py')
+    network = vertigo.create_network('test')
+    network.acking = True
+    network.add_verticle('test_feeder', feeder)
+    network.add_verticle('test_worker', 'test_failing_worker.py').add_input('test_feeder')
     return network
 
   def test_basic_feeder_ack(self):

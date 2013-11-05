@@ -15,7 +15,6 @@ import net.kuujo.vertigo.context.InstanceContext
 import net.kuujo.vertigo.feeder.DefaultBasicFeeder
 import net.kuujo.vertigo.feeder.DefaultPollingFeeder
 import net.kuujo.vertigo.feeder.DefaultStreamFeeder
-import net.kuujo.vertigo.messaging.JsonMessage
 import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
@@ -31,7 +30,7 @@ class _AbstractFeeder(object):
     if context is not None:
       context = context._context
     else:
-      context = net.kuujo.vertigo.context.InstanceContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
+      context = net.kuujo.vertigo.context.InstanceContext.fromJson(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
       org.vertx.java.platform.impl.JythonVerticleFactory.container.config().removeField('__context__')
     self._feeder = self._handlercls(
       org.vertx.java.platform.impl.JythonVerticleFactory.vertx,
@@ -109,13 +108,13 @@ class BasicFeeder(_AbstractFeeder):
   """
   A basic feeder.
   """
-  _handlercls = net.kuujo.vertigo.component.feeder.DefaultBasicFeeder
+  _handlercls = net.kuujo.vertigo.feeder.DefaultBasicFeeder
 
 class PollingFeeder(_AbstractFeeder):
   """
   A polling feeder.
   """
-  _handlercls = net.kuujo.vertigo.component.feeder.DefaultPollingFeeder
+  _handlercls = net.kuujo.vertigo.feeder.DefaultPollingFeeder
 
   def set_feed_delay(self, delay):
     self._feeder.setFeedDelay(delay)
@@ -136,7 +135,7 @@ class StreamFeeder(_AbstractFeeder):
   """
   A stream feeder.
   """
-  _handlercls = net.kuujo.vertigo.component.feeder.DefaultStreamFeeder
+  _handlercls = net.kuujo.vertigo.feeder.DefaultStreamFeeder
 
   def full_handler(self, handler):
     """

@@ -15,8 +15,9 @@ import net.kuujo.vertigo.network.Network
 import net.kuujo.vertigo.network.Verticle
 import net.kuujo.vertigo.network.Module
 import org.vertx.java.core.json.JsonObject
-from vertx.javautils import map_to_java
+from core.javautils import map_to_java
 from input import Input
+from grouping import Grouping
 
 class Network(object):
   """
@@ -45,37 +46,41 @@ class Network(object):
     self._network.disableAcking()
     return self
 
-  def get_acking(self):
-    return self._network.isAckingEnabled()
-
   def set_acking(self, acking):
+    """Sets network acking."""
     if acking:
       self._network.enableAcking()
     else:
       self._network.disableAcking()
 
+  def get_acking(self):
+    """Gets network acking."""
+    return self._network.isAckingEnabled()
+
   acking = property(get_acking, set_acking)
 
   def get_ack_expire(self):
+    """Gets the network ack expiration."""
     return self._network.getAckExpire()
 
   def set_ack_expire(self, expire):
+    """Sets the network ack expiration."""
     self._network.setAckExpire(expire)
 
   ack_expire = property(get_ack_expire, set_ack_expire)
 
   def get_ack_delay(self):
+    """Gets the network ack delay."""
     return self._network.getAckDelay()
 
   def set_ack_delay(self, delay):
+    """Sets the network ack delay."""
     self._network.setAckDelay(delay)
 
   ack_delay = property(get_ack_delay, set_ack_delay)
 
   def add_component(self, component):
-    """
-    Adds a component to the network.
-    """
+    """Adds a component to the network."""
     self._network.addComponent(component._component)
     return component
 
@@ -126,24 +131,30 @@ class Component(object):
 
   @property
   def address(self):
+    """The component address."""
     return self._component.getAddress()
 
   @property
   def type(self):
+    """The component type, either "module" or "verticle"."""
     return self._component.getType()
 
-  def get_config(self):
-    return map_from_java(self._component.getConfig().toMap())
-
   def set_config(self, config):
+    """Sets the component configuration."""
     self._component.setConfig(org.vertx.java.core.json.JsonObject(map_to_java(config)))
+
+  def get_config(self):
+    """Gets the component configuration."""
+    return map_from_java(self._component.getConfig().toMap())
 
   config = property(get_config, set_config)
 
   def get_instances(self):
+    """Gets the number of component instances."""
     return self._component.getNumInstances()
 
   def set_instances(self, instances):
+    """Sets the number of component instances."""
     self._component.setNumInstances(instances)
 
   instances = property(get_instances, set_instances)
@@ -152,23 +163,33 @@ class Component(object):
     """
     Adds an input to the component.
     """
-    if grouping is not None and len(filters) > 0:
-      return Input(self._component.addInput(address, grouping._grouping, *[filter._filter for filter in filters]))
-    elif grouping is not None:
-      return Input(self._component.addInput(address, grouping._grouping))
-    elif len(filters) > 0:
-      return Input(self._component.addInput(address, *[filter._filter for filter in filters]))
+    if grouping is not None:
+      if isinstance(grouping, Grouping):
+        return Input(self._component.addInput(address, grouping._grouping, *[filter._filter for filter in filters]))
+      else:
+        return Input(self._component.addInput(address, grouping._filter, *[filter._filter for filter in filters]))
     else:
       return Input(self._component.addInput(address))
+
+  @property
+  def inputs(self):
+    """A list of component inputs."""
+    iterator = self._component.getInputs().iterator()
+    inputs = []
+    while iterator.hasNext():
+      inputs.append(Input(iterator.next()))
+    return inputs
 
 class Verticle(Component):
   """
   A verticle component.
   """
   def get_main(self):
+    """Gets the verticle main."""
     return self._component.getMain()
 
   def set_main(self, main):
+    """Sets the verticle main."""
     self._component.setMain(main)
 
   main = property(get_main, set_main)
@@ -178,9 +199,11 @@ class Module(Component):
   A module component.
   """
   def get_module(self):
+    """Gets the module name."""
     return self._component.getModule()
 
   def set_module(self, module):
+    """Sets the module name."""
     self._component.setModule(module)
 
   module = property(get_module, set_module)

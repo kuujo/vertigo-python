@@ -49,7 +49,7 @@ class TagsFilter(Filter):
   A tags filter.
   """
   def __init__(self, *tags):
-    self._filter = net.kuujo.vertigo.input.filter.TagsFilter(*tags)
+    self._filter = net.kuujo.vertigo.input.filter.TagsFilter(tags)
 
   def add_tag(self, tag):
     self._filter.addTag(tag)

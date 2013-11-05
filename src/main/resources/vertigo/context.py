@@ -28,9 +28,7 @@ class NetworkContext(_AbstractContext):
   """
   @staticmethod
   def from_dict(self, json):
-    """
-    Creates a network context from a dictionary.
-    """
+    """Creates a network context from a dictionary."""
     return NetworkContext(net.kuujo.vertigo.context.NetworkContext.fromJson(org.vertx.java.core.json.JsonObject(map_to_java(json))))
 
   @property
@@ -39,19 +37,29 @@ class NetworkContext(_AbstractContext):
 
   @property
   def broadcast_address(self):
+    """The network broadcast address."""
     return self._context.getBroadcastAddress()
 
   @property
   def auditors(self):
+    """A list of network auditors."""
     auditors = self._context.getAuditors()
     iterator = auditors.iterator()
-    return [iterator.next() while iterator.hasNext()]
+    auditors = []
+    while iterator.hasNext():
+      auditors.append(iterator.next())
+    return auditors
 
   @property
   def components(self):
+    """A dictionary of component contexts, keyed by component addresses."""
     collection = self._context.getComponents()
     iterator = collection.iterator()
-    return [ComponentContext(iterator.next()) while iterator.hasNext()]
+    components = {}
+    while iterator.hasNext():
+      component = iterator.next()
+      components[component.getAddress()] = ComponentContext(component)
+    return components
 
 class ComponentContext(_AbstractContext):
   """
@@ -59,42 +67,54 @@ class ComponentContext(_AbstractContext):
   """
   @property
   def address(self):
+    """The component address."""
     return self._context.getAddress()
 
   @property
   def type(self):
+    """The component type."""
     return self._context.getType()
 
   @property
   def is_module(self):
+    """Indicates whether the component is a module."""
     return self._context.isModule()
 
   @property
   def is_verticle(self):
+    """Indicates whether the component is a verticle."""
     return self._context.isVerticle()
 
   @property
   def module(self):
+    """The module name (if the component is a module)."""
     if self.is_module:
       return self._context.getModule()
 
   @property
   def main(self):
+    """The verticle main (if the component is a verticle)."""
     if self.is_verticle:
       return self._context.getMain()
 
   @property
   def config(self):
-    return map_from_java(self._context.config().toMap())
+    """The component configuration."""
+    return map_from_java(self._context.getConfig().toMap())
 
   @property
   def instances(self):
+    """A list of component instance contexts."""
     collection = self._context.getInstances()
     iterator = collection.iterator()
-    return [InstanceContext(iterator.next()) while iterator.hasNext()]
+    instances = []
+    while iterator.hasNext():
+      instances.append(InstanceContext(iterator.next()))
+    return instances
 
   @property
   def network(self):
+    """The parent network context."""
     return NetworkContext(self._context.getNetwork())
 
 class InstanceContext(_AbstractContext):
@@ -103,8 +123,10 @@ class InstanceContext(_AbstractContext):
   """
   @property
   def id(self):
+    """The instance ID."""
     return self._context.id()
 
   @property
   def component(self):
+    """The parent component context."""
     return ComponentContext(self._context.getComponent())

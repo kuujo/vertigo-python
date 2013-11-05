@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from context import NetworkContext
-import net.kuujo.vertigo.LocalCluster
-import net.kuujo.vertigo.ViaCluster
+import net.kuujo.vertigo.cluster.LocalCluster
+import net.kuujo.vertigo.cluster.ViaCluster
 import org.vertx.java.core.AsyncResultHandler
 import org.vertx.java.platform.impl.JythonVerticleFactory
 from core.javautils import map_from_java, map_to_java
@@ -28,14 +28,14 @@ class _AbstractCluster(object):
     if self._handlercls is not None:
       self._cluster = self._handlercls(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
 
-  def deploy(self, definition, handler=None):
+  def deploy(self, network, handler=None):
     """
     Deploys a network.
     """
     if handler is not None:
-      self._cluster.deploy(definition._def, DeployHandler(handler))
+      self._cluster.deploy(network._network, DeployHandler(handler))
     else:
-      self._cluster.deploy(definition._def)
+      self._cluster.deploy(network._network)
 
   def shutdown(self, context, handler=None):
     """
@@ -50,13 +50,13 @@ class LocalCluster(_AbstractCluster):
   """
   A local cluster.
   """
-  _handlercls = net.kuujo.vertigo.LocalCluster
+  _handlercls = net.kuujo.vertigo.cluster.LocalCluster
 
 class ViaCluster(_AbstractCluster):
   """
   A via cluster.
   """
-  _handlercls = net.kuujo.vertigo.ViaCluster
+  _handlercls = net.kuujo.vertigo.cluster.ViaCluster
 
 class DeployHandler(org.vertx.java.core.AsyncResultHandler):
   """

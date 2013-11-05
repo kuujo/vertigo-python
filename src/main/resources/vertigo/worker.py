@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import net.kuujo.vertigo.context.InstanceContext
-import net.kuujo.vertigo.worker.BasicWorker
+import net.kuujo.vertigo.worker.DefaultBasicWorker
 import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.Handler
 import org.vertx.java.core.AsyncResultHandler
 import org.vertx.java.core.json.JsonObject
-from messaging import Message
+from message import Message
 from core.javautils import map_from_java, map_to_java
 
 class BasicWorker(object):
@@ -28,9 +28,9 @@ class BasicWorker(object):
     if context is not None:
       context = context._context
     else:
-      context = net.kuujo.vertigo.context.InstanceContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
+      context = net.kuujo.vertigo.context.InstanceContext.fromJson(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
       org.vertx.java.platform.impl.JythonVerticleFactory.container.config().removeField('__context__')
-    self._worker = net.kuujo.vertigo.component.worker.BasicWorker(
+    self._worker = net.kuujo.vertigo.worker.DefaultBasicWorker(
       org.vertx.java.platform.impl.JythonVerticleFactory.vertx,
       org.vertx.java.platform.impl.JythonVerticleFactory.container,
       context

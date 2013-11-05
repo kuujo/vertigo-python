@@ -15,7 +15,6 @@ import net.kuujo.vertigo.context.InstanceContext
 import net.kuujo.vertigo.rpc.DefaultBasicExecutor
 import net.kuujo.vertigo.rpc.DefaultPollingExecutor
 import net.kuujo.vertigo.rpc.DefaultStreamExecutor
-import net.kuujo.vertigo.messaging.JsonMessage
 import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
@@ -31,7 +30,7 @@ class _AbstractExecutor(object):
     if context is not None:
       context = context._context
     else:
-      context = net.kuujo.vertigo.context.InstanceContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
+      context = net.kuujo.vertigo.context.InstanceContext.fromJson(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
       org.vertx.java.platform.impl.JythonVerticleFactory.container.config().removeField('__context__')
     self._executor = self._handlercls(
       org.vertx.java.platform.impl.JythonVerticleFactory.vertx,
@@ -109,13 +108,13 @@ class BasicExecutor(_AbstractExecutor):
   """
   A basic executor.
   """
-  _handlercls = net.kuujo.vertigo.component.executor.DefaultBasicExecutor
+  _handlercls = net.kuujo.vertigo.rpc.DefaultBasicExecutor
 
 class PollingExecutor(_AbstractExecutor):
   """
   A polling executor.
   """
-  _handlercls = net.kuujo.vertigo.component.executor.DefaultPollingExecutor
+  _handlercls = net.kuujo.vertigo.rpc.DefaultPollingExecutor
 
   def set_execute_delay(self, delay):
     self._executor.setExecuteDelay(delay)
@@ -136,7 +135,7 @@ class StreamExecutor(_AbstractExecutor):
   """
   A stream executor.
   """
-  _handlercls = net.kuujo.vertigo.component.executor.DefaultStreamExecutor
+  _handlercls = net.kuujo.vertigo.rpc.DefaultStreamExecutor
 
   def full_handler(self, handler):
     """
