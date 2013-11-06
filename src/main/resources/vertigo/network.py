@@ -95,7 +95,7 @@ class Network(object):
     elif config is not None:
       return Verticle(self._network.addVerticle(address, map_to_java(config), instances))
     else:
-      return Verticle(self._network.addVerticle(address).setNumInstances(instances))
+      return Verticle(self._network.addVerticle(address).setInstances(instances))
 
   def add_module(self, address, module=None, config=None, instances=1):
     """
@@ -108,7 +108,7 @@ class Network(object):
     elif config is not None:
       return Module(self._network.addModule(address, map_to_java(config), instances))
     else:
-      return Module(self._network.addModule(address).setNumInstances(instances))
+      return Module(self._network.addModule(address).setInstances(instances))
 
   @property
   def components(self):
@@ -151,11 +151,11 @@ class Component(object):
 
   def get_instances(self):
     """Gets the number of component instances."""
-    return self._component.getNumInstances()
+    return self._component.getInstances()
 
   def set_instances(self, instances):
     """Sets the number of component instances."""
-    self._component.setNumInstances(instances)
+    self._component.setInstances(instances)
 
   instances = property(get_instances, set_instances)
 
