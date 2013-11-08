@@ -1,5 +1,8 @@
 {
+  "includes": "net.kuujo~vertigo~0.5.0",
+  "description": "Python API for Vertigo.",
+  "licenses": ["The Apache Software License Version 2.0"],
   "author": "Jordan Halterman",
-  "website": "https://github.com/kuujo/vertigo",
-  "includes": "net.kuujo~vertigo~0.1.0-SNAPSHOT"
+  "keywords": ["event", "processing", "real-time"],
+  "homepage": "https://github.com/kuujo/vertigo-python"
 }
