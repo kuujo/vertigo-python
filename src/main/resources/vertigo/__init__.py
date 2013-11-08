@@ -15,6 +15,16 @@ from network import Network
 from worker import BasicWorker
 from feeder import BasicFeeder, PollingFeeder, StreamFeeder
 from rpc import BasicExecutor, PollingExecutor, StreamExecutor
+import net.kuujo.vertigo.Vertigo
+import org.vertx.java.platform.impl.JythonVerticleFactory
+
+vertigo = net.kuujo.vertigo.Vertigo(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
+
+def is_component():
+  """
+  Indicates whether the current verticle is a Vertigo component instance.
+  """
+  return vertigo.isComponent()
 
 def create_network(address):
   """
@@ -22,44 +32,62 @@ def create_network(address):
   """
   return Network(address)
 
-def create_basic_feeder(context=None):
+def create_feeder():
   """
   Creates a basic feeder.
   """
-  return BasicFeeder(context)
+  return create_basic_feeder()
 
-def create_polling_feeder(context=None):
+def create_basic_feeder():
+  """
+  Creates a basic feeder.
+  """
+  return BasicFeeder(vertigo.createBasicFeeder())
+
+def create_polling_feeder():
   """
   Creates a polling feeder.
   """
-  return PollingFeeder(context)
+  return PollingFeeder(vertigo.createPollingFeeder())
 
-def create_stream_feeder(context=None):
+def create_stream_feeder():
   """
   Creates a stream feeder.
   """
-  return StreamFeeder(context)
+  return StreamFeeder(vertigo.createStreamFeeder())
 
-def create_basic_executor(context=None):
+def create_executor():
   """
   Creates a basic executor.
   """
-  return BasicExecutor(context)
+  return create_basic_executor()
 
-def create_polling_executor(context=None):
+def create_basic_executor():
+  """
+  Creates a basic executor.
+  """
+  return BasicExecutor(vertigo.createBasicExecutor())
+
+def create_polling_executor():
   """
   Creates a polling executor.
   """
-  return PollingExecutor(context)
+  return PollingExecutor(vertigo.createPollingExecutor())
 
-def create_stream_executor(context=None):
+def create_stream_executor():
   """
   Creates a stream executor.
   """
-  return StreamExecutor(context)
+  return StreamExecutor(vertigo.createStreamExecutor())
 
-def create_worker(context=None):
+def create_worker():
   """
   Creates a basic worker.
   """
-  return BasicWorker(context)
+  return create_basic_worker()
+
+def create_basic_worker():
+  """
+  Creates a basic worker.
+  """
+  return BasicWorker(vertigo.createBasicWorker())

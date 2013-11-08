@@ -25,7 +25,7 @@ def start_handler(error, feeder):
       Test.complete()
 
     def do_feed(timer_id):
-      feeder.feed({'body': 'Hello world!'}, tag='test', handler=ack_handler)
+      feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
     vertx.set_timer(1000, do_feed)
 
 feeder.start(start_handler)

@@ -33,6 +33,6 @@ def start_handler(error, feeder):
     Test.complete()
 
   while not feeder.queue_full():
-    feeder.feed({'body': 'Hello world!'}, tag='test', handler=ack_handler)
+    feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
 
 feeder.start(start_handler)

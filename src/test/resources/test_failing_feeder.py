@@ -23,6 +23,6 @@ def start_handler(error, feeder):
     def ack_handler(error=None):
       Assert.not_null(error)
       Test.complete()
-    feeder.feed({'body': 'Hello world!'}, tag='test', handler=ack_handler)
+    feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
 
 feeder.start(start_handler)

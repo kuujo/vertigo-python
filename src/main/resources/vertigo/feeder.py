@@ -11,11 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import net.kuujo.vertigo.context.InstanceContext
-import net.kuujo.vertigo.feeder.DefaultBasicFeeder
-import net.kuujo.vertigo.feeder.DefaultPollingFeeder
-import net.kuujo.vertigo.feeder.DefaultStreamFeeder
-import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
@@ -24,19 +19,8 @@ class _AbstractFeeder(object):
   """
   An abstract feeder.
   """
-  _handlercls = None
-
-  def __init__(self, context=None):
-    if context is not None:
-      context = context._context
-    else:
-      context = net.kuujo.vertigo.context.InstanceContext.fromJson(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
-      org.vertx.java.platform.impl.JythonVerticleFactory.container.config().removeField('__context__')
-    self._feeder = self._handlercls(
-      org.vertx.java.platform.impl.JythonVerticleFactory.vertx,
-      org.vertx.java.platform.impl.JythonVerticleFactory.container,
-      context
-    )
+  def __init__(self, feeder):
+    self._feeder = feeder
 
   def set_ack_timeout(self, timeout):
     self._feeder.setAckTimeout(timeout)
@@ -85,20 +69,20 @@ class _AbstractFeeder(object):
     else:
       self._feeder.start()
 
-  def feed(self, data, tag=None, handler=None):
+  def emit(self, data, tag=None, handler=None):
     """
-    Feeds data to the network.
+    Emits data from the feeder.
     """
     if handler is not None:
       if tag is not None:
-        self._feeder.feed(self._convert_data(data), tag, FeedResultHandler(handler))
+        self._feeder.emit(self._convert_data(data), tag, FeedResultHandler(handler))
       else:
-        self._feeder.feed(self._convert_data(data), FeedResultHandler(handler))
+        self._feeder.emit(self._convert_data(data), FeedResultHandler(handler))
     else:
       if tag is not None:
-        self._feeder.feed(self._convert_data(data), tag)
+        self._feeder.emit(self._convert_data(data), tag)
       else:
-        self._feeder.feed(self._convert_data(data))
+        self._feeder.emit(self._convert_data(data))
     return self
 
   def _convert_data(self, data):
@@ -108,14 +92,11 @@ class BasicFeeder(_AbstractFeeder):
   """
   A basic feeder.
   """
-  _handlercls = net.kuujo.vertigo.feeder.DefaultBasicFeeder
 
 class PollingFeeder(_AbstractFeeder):
   """
   A polling feeder.
   """
-  _handlercls = net.kuujo.vertigo.feeder.DefaultPollingFeeder
-
   def set_feed_delay(self, delay):
     self._feeder.setFeedDelay(delay)
 
@@ -135,8 +116,6 @@ class StreamFeeder(_AbstractFeeder):
   """
   A stream feeder.
   """
-  _handlercls = net.kuujo.vertigo.feeder.DefaultStreamFeeder
-
   def full_handler(self, handler):
     """
     Registers a full handler.

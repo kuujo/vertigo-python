@@ -11,11 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import net.kuujo.vertigo.context.InstanceContext
-import net.kuujo.vertigo.rpc.DefaultBasicExecutor
-import net.kuujo.vertigo.rpc.DefaultPollingExecutor
-import net.kuujo.vertigo.rpc.DefaultStreamExecutor
-import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
@@ -24,19 +19,8 @@ class _AbstractExecutor(object):
   """
   An abstract executor.
   """
-  _handlercls = None
-
-  def __init__(self, context=None):
-    if context is not None:
-      context = context._context
-    else:
-      context = net.kuujo.vertigo.context.InstanceContext.fromJson(org.vertx.java.platform.impl.JythonVerticleFactory.container.config().getObject('__context__'))
-      org.vertx.java.platform.impl.JythonVerticleFactory.container.config().removeField('__context__')
-    self._executor = self._handlercls(
-      org.vertx.java.platform.impl.JythonVerticleFactory.vertx,
-      org.vertx.java.platform.impl.JythonVerticleFactory.container,
-      context
-    )
+  def __init__(self, executor):
+    self._executor = executor
 
   def set_ack_timeout(self, timeout):
     self._executor.setAckTimeout(timeout)
@@ -108,13 +92,11 @@ class BasicExecutor(_AbstractExecutor):
   """
   A basic executor.
   """
-  _handlercls = net.kuujo.vertigo.rpc.DefaultBasicExecutor
 
 class PollingExecutor(_AbstractExecutor):
   """
   A polling executor.
   """
-  _handlercls = net.kuujo.vertigo.rpc.DefaultPollingExecutor
 
   def set_execute_delay(self, delay):
     self._executor.setExecuteDelay(delay)
@@ -135,8 +117,6 @@ class StreamExecutor(_AbstractExecutor):
   """
   A stream executor.
   """
-  _handlercls = net.kuujo.vertigo.rpc.DefaultStreamExecutor
-
   def full_handler(self, handler):
     """
     Registers a full handler.
