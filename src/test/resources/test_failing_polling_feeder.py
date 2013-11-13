@@ -20,11 +20,12 @@ def start_handler(error, feeder):
   if error:
     Assert.true(False)
 
+  @feeder.fail_handler
+  def fail(messageid):
+    Test.complete()
+
   @feeder.feed_handler
   def feed_handler(message):
-    def ack_handler(error):
-      Assert.not_null(error)
-      Test.complete()
-    feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
+    feeder.emit({'body': 'Hello world!'}, tag='test')
 
 feeder.start(start_handler)

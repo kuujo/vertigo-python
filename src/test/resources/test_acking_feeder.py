@@ -14,7 +14,7 @@
 from test import Assert, Test
 import vertx, vertigo
 
-feeder = vertigo.create_basic_feeder()
+feeder = vertigo.create_stream_feeder()
 
 def start_handler(error, feeder):
   if error:

@@ -14,7 +14,7 @@
 from network import Network
 from worker import BasicWorker
 from feeder import BasicFeeder, PollingFeeder, StreamFeeder
-from rpc import BasicExecutor, PollingExecutor, StreamExecutor
+from rpc import PollingExecutor, StreamExecutor
 import net.kuujo.vertigo.Vertigo
 import org.vertx.java.platform.impl.JythonVerticleFactory
 

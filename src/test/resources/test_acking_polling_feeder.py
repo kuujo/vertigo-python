@@ -19,12 +19,12 @@ feeder = vertigo.create_polling_feeder()
 def start_handler(error, feeder):
   if error:
     Assert.true(False)
+  @feeder.ack_handler
+  def ack(messageid):
+    Test.complete()
 
   @feeder.feed_handler
   def feed_handler(message):
-    def ack_handler(error):
-      Assert.null(error)
-      Test.complete()
-    feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
+    feeder.emit({'body': 'Hello world!'}, tag='test')
 
 feeder.start(start_handler)

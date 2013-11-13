@@ -20,10 +20,6 @@ def start_handler(error, feeder):
   if error:
     Assert.true(False)
 
-  @feeder.full_handler
-  def full_handler():
-    pass
-
   @feeder.drain_handler
   def drain_handler():
     pass
@@ -32,7 +28,7 @@ def start_handler(error, feeder):
     Assert.not_null(error)
     Test.complete()
 
-  while not feeder.queue_full():
+  if not feeder.queue_full():
     feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
 
 feeder.start(start_handler)
