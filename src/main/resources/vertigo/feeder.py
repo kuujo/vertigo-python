@@ -119,7 +119,7 @@ class PollingFeeder(BasicFeeder):
 
     @return: the added handler
     """
-    self._feeder.ackHandler(AckFailHandler(handler))
+    self._feeder.ackHandler(AckFailTimeoutHandler(handler))
     return handler
 
   def fail_handler(self, handler):
@@ -130,7 +130,18 @@ class PollingFeeder(BasicFeeder):
 
     @return: the added handler
     """
-    self._feeder.failHandler(AckFailHandler(handler))
+    self._feeder.failHandler(AckFailTimeoutHandler(handler))
+    return handler
+
+  def timeout_handler(self, handler):
+    """Registers a timeout handler on the feeder.
+
+    Keyword arguments:
+    @param handler: a handler to be called when a message times out with the message id.
+
+    @return: the added handler
+    """
+    self._feeder.timeoutHandler(AckFailTimeoutHandler(handler))
     return handler
 
 class StreamFeeder(_AbstractFeeder):
@@ -179,8 +190,8 @@ class StartHandler(org.vertx.java.core.AsyncResultHandler):
     else:
       self.handler(result.cause(), self.feeder)
 
-class AckFailHandler(org.vertx.java.core.Handler):
-  """An ack/fail handler."""
+class AckFailTimeoutHandler(org.vertx.java.core.Handler):
+  """An ack/fail/timeout handler."""
   def __init__(self, handler):
     self.handler = handler
 

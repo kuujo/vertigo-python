@@ -23,59 +23,71 @@ class Input(object):
     self._input = javaobj
 
   def group_by(self, grouping):
-    """
-    Sets a grouping on the input.
+    """Sets a grouping on the input.
+
+    Keyword arguments:
+    @param grouping: an input grouping.
+
+    @return: self
     """
     self._input.groupBy(grouping._grouping)
     return self
 
   def filter_by(self, filter):
-    """
-    Adds a filter to the input.
+    """Adds a filter to the input.
+
+    Keyword arguments:
+    @param filter: an input filter.
+
+    @return: self
     """
     self._input.filterBy(filter._filter)
     return self
 
 class Listener(object):
-  """
-  An input listener.
-  """
+  """An input listener."""
   def __init__(self, address):
     self._listener = net.kuujo.vertigo.input.DefaultListener(address, org.vertx.java.platform.impl.JythonVerticleFactory.vertx)
 
   def get_auto_ack(self):
+    """Indicates whether auto acking is enabled."""
     return self._listener.isAutoAck()
 
   def set_auto_ack(self, ack):
+    """Sets auto acking."""
     self._listener.setAutoAck(ack)
 
   auto_ack = property(get_auto_ack, set_auto_ack)
 
   def message_handler(self, handler):
-    """
-    Registers a message handler on the listener.
-    """
+    """Registers a message handler on the listener."""
     self._listener.messageHandler(MessageHandler(handler, self))
     return handler
 
   def ack(self, message):
-    """
-    Acks a message.
+    """Acks a message.
+
+    Keyword arguments:
+    @param message: the message to ack.
+
+    @return: self
     """
     self._listener.ack(message._message)
     return self
 
   def fail(self, message):
-    """
-    Fails a message.
+    """Fails a message.
+
+    Keyword arguments:
+    @param message: the message to fail.
+
+    @return: self
     """
     self._listener.fail(message._message)
     return self
 
   def start(self, handler=None):
-    """
-    Starts the listener.
-    """
+    """Starts the listener."""
     if handler is not None:
       self._listener.start(StartHandler(handler))
     else:
@@ -83,9 +95,7 @@ class Listener(object):
     return self
 
   def stop(self, handler=None):
-    """
-    Stops the listener.
-    """
+    """Stops the listener."""
     if handler is not None:
       self._listener.stop(StopHandler(handler))
     else:
@@ -93,9 +103,7 @@ class Listener(object):
     return self
 
 class StartHandler(org.vertx.java.core.AsyncResultHandler):
-  """
-  A listener start handler.
-  """
+  """A listener start handler."""
   def __init__(self, handler):
     self.handler = handler
 
@@ -106,9 +114,7 @@ class StartHandler(org.vertx.java.core.AsyncResultHandler):
       self.handler(None)
 
 class StopHandler(org.vertx.java.core.AsyncResultHandler):
-  """
-  A listener stop handler.
-  """
+  """A listener stop handler."""
   def __init__(self, handler):
     self.handler = handler
 
@@ -119,9 +125,7 @@ class StopHandler(org.vertx.java.core.AsyncResultHandler):
       self.handler(None)
 
 class MessageHandler(org.vertx.java.core.Handler):
-  """
-  A message handler wrapper.
-  """
+  """A message handler wrapper."""
   def __init__(self, handler, listener):
     self.handler = handler
     self.listener = listener

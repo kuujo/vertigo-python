@@ -56,18 +56,6 @@ def create_stream_feeder():
   """
   return StreamFeeder(vertigo.createStreamFeeder())
 
-def create_executor():
-  """
-  Creates a basic executor.
-  """
-  return create_basic_executor()
-
-def create_basic_executor():
-  """
-  Creates a basic executor.
-  """
-  return BasicExecutor(vertigo.createBasicExecutor())
-
 def create_polling_executor():
   """
   Creates a polling executor.

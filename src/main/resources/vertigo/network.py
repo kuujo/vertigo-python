@@ -31,18 +31,22 @@ class Network(object):
     return self._network.getAddress()
 
   def get_num_auditors(self):
+    """The number of network auditors."""
     return self._network.getNumAuditors()
 
   def set_num_auditors(self, num):
+    """The number of network auditors."""
     self._network.setNumAuditors(num)
 
   num_auditors = property(get_num_auditors, set_num_auditors)
 
   def enable_acking(self):
+    """Enables acking on the network."""
     self._network.enableAcking()
     return self
 
   def disable_acking(self):
+    """Disables acking on the network."""
     self._network.disableAcking()
     return self
 
@@ -59,15 +63,15 @@ class Network(object):
 
   acking = property(get_acking, set_acking)
 
-  def get_ack_expire(self):
-    """Gets the network ack expiration."""
-    return self._network.getAckExpire()
+  def get_ack_timeout(self):
+    """Gets the network ack timeout."""
+    return self._network.getAckTimeout()
 
-  def set_ack_expire(self, expire):
-    """Sets the network ack expiration."""
-    self._network.setAckExpire(expire)
+  def set_ack_timeout(self, timeout):
+    """Sets the network ack timeout."""
+    self._network.setAckTimeout(timeout)
 
-  ack_expire = property(get_ack_expire, set_ack_expire)
+  ack_expire = property(get_ack_timeout, set_ack_timeout)
 
   def get_ack_delay(self):
     """Gets the network ack delay."""

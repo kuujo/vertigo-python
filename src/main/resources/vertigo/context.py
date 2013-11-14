@@ -51,6 +51,21 @@ class NetworkContext(_AbstractContext):
     return auditors
 
   @property
+  def acking(self):
+    """Indicates whether acking is enabled."""
+    return self._context.isAckingEnabled()
+
+  @property
+  def ack_timeout(self):
+    """The network ack timeout."""
+    return self._context.getAckTimeout()
+
+  @property
+  def ack_delay(self):
+    """The network ack delay."""
+    return self._context.getAckDelay()
+
+  @property
   def components(self):
     """A dictionary of component contexts, keyed by component addresses."""
     collection = self._context.getComponents()

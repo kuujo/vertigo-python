@@ -44,6 +44,26 @@ class _AbstractExecutor(object):
     """Indicates whether the executor queue is full."""
     return self._executor.queueFull()
 
+  def set_auto_retry(self, retry):
+    """Indicates whether to automatically retry sending failed messages."""
+    self._executor.setAutoRetry(retry)
+
+  def get_auto_retry(self):
+    """Indicates whether to automatically retry sending failed messages."""
+    return self._executor.getAutoRetry()
+
+  auto_retry = property(get_auto_retry, set_auto_retry)
+
+  def set_retry_attempts(self, attempts):
+    """Indicates how many times to retry sending failed messages."""
+    self._executor.setRetryAttempts(attempts)
+
+  def get_retry_attempts(self):
+    """Indicates how many times to retry sending failed messages."""
+    return self._executor.getRetryAttempts()
+
+  retry_attempts = property(get_retry_attempts, set_retry_attempts)
+
   def start(self, handler=None):
     """Starts the executor.
 
@@ -103,7 +123,18 @@ class PollingExecutor(_AbstractExecutor):
 
     @return: the added handler.
     """
-    self._executor.failHandler(FailHandler(handler))
+    self._executor.failHandler(FailTimeoutHandler(handler))
+    return handler
+
+  def timeout_handler(self, handler):
+    """Registers a timeout handler.
+
+    Keyword arguments:
+    @param handler: a handler to be called when an execution timeout is received.
+
+    @return: the added handler.
+    """
+    self._executor.timeoutHandler(FailTimeoutHandler(handler))
     return handler
 
   def execute(self, data, tag=None):
@@ -172,8 +203,8 @@ class ResultHandler(org.vertx.java.core.Handler):
   def handle(self, result):
     self.handler(Message(result))
 
-class FailHandler(org.vertx.java.core.Handler):
-  """A fail handler."""
+class FailTimeoutHandler(org.vertx.java.core.Handler):
+  """A fail/timeout handler."""
   def __init__(self, handler):
     self.handler = handler
 
