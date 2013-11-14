@@ -34,8 +34,8 @@ class Message(object):
     return self._message.parent()
 
   @property
-  def ancestor(self):
-    return self._message.ancestor()
+  def root(self):
+    return self._message.root()
 
   @property
   def body(self):
