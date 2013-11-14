@@ -1,7 +1,7 @@
 Vert.igo Python API
 ===================
 
-#### [The documentation has moved!](https://github.com/kuujo/vertigo-js/wiki/Vertigo-Documentation)
+#### [The documentation has moved!](https://github.com/kuujo/vertigo-python/wiki/Vertigo-Documentation)
 
 **[Python User Manual](https://github.com/kuujo/vertigo-python/wiki/Python-User-Manual) | [Javadoc](http://vertigo.kuujo.net/python/)**
 
