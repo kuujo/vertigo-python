@@ -14,6 +14,7 @@
 import net.kuujo.vertigo.network.Network
 import net.kuujo.vertigo.network.Verticle
 import net.kuujo.vertigo.network.Module
+import net.kuujo.vertigo.hooks.EventBusHook
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_to_java
 from input import Input
@@ -89,8 +90,15 @@ class Network(object):
     return component
 
   def add_verticle(self, address, main=None, config=None, instances=1):
-    """
-    Adds a verticle component to the network.
+    """Adds a verticle component to the network.
+
+    Keyword arguments:
+    @param address: The component event bus address.
+    @param main: The verticle main.
+    @param config: The verticle component configuration.
+    @param instances: The number of verticle instances.
+
+    @return: A new Verticle component definition.
     """
     if main is not None and config is not None:
       return Verticle(self._network.addVerticle(address, main, map_to_java(config), instances))
@@ -102,8 +110,15 @@ class Network(object):
       return Verticle(self._network.addVerticle(address).setInstances(instances))
 
   def add_module(self, address, module=None, config=None, instances=1):
-    """
-    Adds a module component to the network.
+    """Adds a module component to the network.
+
+    Keyword arguments:
+    @param address: The component event bus address.
+    @param main: The module name.
+    @param config: The module component configuration.
+    @param instances: The number of module instances.
+
+    @return: A new Module component definition.
     """
     if module is not None and config is not None:
       return Module(self._network.addModule(address, module, map_to_java(config), instances))
@@ -132,6 +147,7 @@ class Component(object):
   """
   def __init__(self, component):
     self._component = component
+    self._hooked = False
 
   @property
   def address(self):
@@ -163,9 +179,27 @@ class Component(object):
 
   instances = property(get_instances, set_instances)
 
-  def add_input(self, address, grouping=None, *filters):
+  def add_hook(self, hook):
+    """Adds a hook to the component.
+
+    Keyword arguments:
+    @param hook: The Hook to add to the component.
+
+    @return: self
     """
-    Adds an input to the component.
+    if not self._hooked:
+      self._component.addHook(net.kuujo.vertigo.hooks.EventBusHook())
+    return self
+
+  def add_input(self, address, grouping=None, *filters):
+    """Adds an input to the component.
+
+    Keyword arguments:
+    @param address: The input address. This is the event bus address of the component
+    from which this component should receive messages via the added input.
+    @param grouping: An input grouping.
+    @param filters: A list of input filters.
+    @return: A new Input instance.
     """
     if grouping is not None:
       if isinstance(grouping, Grouping):
