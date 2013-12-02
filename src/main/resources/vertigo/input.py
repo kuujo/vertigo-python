@@ -33,17 +33,6 @@ class Input(object):
     self._input.groupBy(grouping._grouping)
     return self
 
-  def filter_by(self, filter):
-    """Adds a filter to the input.
-
-    Keyword arguments:
-    @param filter: an input filter.
-
-    @return: self
-    """
-    self._input.filterBy(filter._filter)
-    return self
-
 class Listener(object):
   """An input listener."""
   def __init__(self, address):

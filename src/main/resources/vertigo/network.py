@@ -74,16 +74,6 @@ class Network(object):
 
   ack_expire = property(get_ack_timeout, set_ack_timeout)
 
-  def get_ack_delay(self):
-    """Gets the network ack delay."""
-    return self._network.getAckDelay()
-
-  def set_ack_delay(self, delay):
-    """Sets the network ack delay."""
-    self._network.setAckDelay(delay)
-
-  ack_delay = property(get_ack_delay, set_ack_delay)
-
   def add_component(self, component):
     """Adds a component to the network."""
     self._network.addComponent(component._component)
@@ -190,6 +180,18 @@ class Component(object):
     if not self._hooked:
       self._component.addHook(net.kuujo.vertigo.hooks.EventBusHook())
     return self
+
+  @property
+  def hooks(self):
+    """Gets a list of hooks.
+
+    @return: A list of component hooks.
+    """
+    iterator = self._component.getHooks().iterator()
+    hooks = []
+    while iterator.hasNext():
+      hooks.append(iterator.next())
+    return hooks
 
   def add_input(self, address, grouping=None, *filters):
     """Adds an input to the component.

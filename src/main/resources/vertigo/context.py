@@ -36,11 +36,6 @@ class NetworkContext(_AbstractContext):
     return self._context.getAddress()
 
   @property
-  def broadcast_address(self):
-    """The network broadcast address."""
-    return self._context.getBroadcastAddress()
-
-  @property
   def auditors(self):
     """A list of network auditors."""
     auditors = self._context.getAuditors()
@@ -59,11 +54,6 @@ class NetworkContext(_AbstractContext):
   def ack_timeout(self):
     """The network ack timeout."""
     return self._context.getAckTimeout()
-
-  @property
-  def ack_delay(self):
-    """The network ack delay."""
-    return self._context.getAckDelay()
 
   @property
   def components(self):
