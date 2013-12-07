@@ -13,6 +13,8 @@
 # limitations under the License.
 import org.vertx.java.core.AsyncResultHandler
 import net.kuujo.vertigo.message.schema.MessageSchema
+from .context import InstanceContext
+from core.javautils import map_from_java
 
 from . import is_component
 if not is_component():
@@ -26,6 +28,16 @@ class Component(object):
         self._component = component
         self._start_handler, self._start_result = None, None
         self.__start_handler = _StartHandler(self)
+
+    @property
+    def context(self):
+        """The component context."""
+        return InstanceContext(self._component.getContext())
+
+    @property
+    def config(self):
+        """The component configuration."""
+        return map_from_java(self._component.getContext().getComponent().getConfig())
 
     def declare_streams(self, streams):
         """Declares component output streams."""
