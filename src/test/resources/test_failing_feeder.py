@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from test import Assert, Test
-import vertx, vertigo
+from vertigo import feeder
 
-def ack_handler(result, error=None):
+@feeder.start_handler
+def start_handler(error, feeder):
+    if error is None:
+        feeder.emit({'body': 'Hello world!'})
+
+@feeder.ack_handler
+def ack_handler(error, id):
     Assert.not_null(error)
     Test.complete()
-
-vertigo.feeder.feed({'body': 'Hello world!'}, handler=ack_handler)

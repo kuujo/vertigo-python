@@ -42,8 +42,8 @@ class NetworkTestCase(TestCase):
     self.assert_equals('test_feeder_verticle.py', component1.main)
     component1.instances = 4
     self.assert_equals(4, component1.instances)
-    component2 = network.add_worker('test_worker_verticle')
-    self.assert_equals('verticle', component2.type)
+    component2 = network.add_worker('test_worker_verticle', main='test_worker_verticle.py')
+    self.assert_equals('worker', component2.type)
     component2.main = 'test_worker_verticle.py'
     self.assert_equals('test_worker_verticle.py', component2.main)
     self.complete()
@@ -60,8 +60,6 @@ class NetworkTestCase(TestCase):
     self.assert_equals(1, len(component2.inputs))
     component2.add_input('test_feeder_verticle', grouping=RoundGrouping())
     self.assert_equals(2, len(component2.inputs))
-    component2.add_input('test_feeder_verticle', TagsFilter('foo', 'bar'))
-    self.assert_equals(3, len(component2.inputs))
     self.complete()
 
 run_test(NetworkTestCase())

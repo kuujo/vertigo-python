@@ -11,21 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys, importlib
+import sys
 import net.kuujo.vertigo.util.Context
 import net.kuujo.vertigo.DefaultVertigoFactory
 import net.kuujo.vertigo.component.DefaultComponentFactory
 import org.vertx.java.platform.impl.JythonVerticleFactory
-from context import NetworkContext, InstancContext
+from context import NetworkContext, InstanceContext
+from network import Network
 
 this = sys.modules[__name__]
 
 current_context = None
-_context = net.kuujo.vertigo.util.Context.parseContext(org.vertx.java.platform.impl.JythonVerticleFactory.config())
+_context = net.kuujo.vertigo.util.Context.parseContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config())
 if _context is not None:
     current_context = InstanceContext(_context)
 
-def _setup_vertigo(context):
+def _setup_vertigo():
     vertx = org.vertx.java.platform.impl.JythonVerticleFactory.vertx
     container = org.vertx.java.platform.impl.JythonVerticleFactory.container
     factory = net.kuujo.vertigo.DefaultVertigoFactory(vertx, container)
@@ -37,25 +38,25 @@ def _setup_vertigo(context):
 
 _vertigo = _setup_vertigo()
 if _vertigo.isComponent():
-    _component_type = net.kuujo.vertigo.util.Component.serializeType(vertigo.context().getComponent().getType())
+    _component_type = net.kuujo.vertigo.util.Component.serializeType(_vertigo.context().getComponent().getType())
     if _component_type == 'feeder':
         from . import _feeder
-        feeder = _feeder.Feeder(_vertigo.component())
+        feeder = _feeder.Feeder(_vertigo.component()).start()
     elif _component_type == 'executor':
         from . import _executor
-        executor = _executor.Executor(_vertigo.component())
+        executor = _executor.Executor(_vertigo.component()).start()
     elif _component_type == 'worker':
         from . import _worker
-        worker = _worker.Worker(_vertigo.component())
+        worker = _worker.Worker(_vertigo.component()).start()
     elif _component_type == 'filter':
         from . import _filter
-        filter = _filter.Filter(_vertigo.component())
+        filter = _filter.Filter(_vertigo.component()).start()
     elif _component_type == 'splitter':
         from . import _splitter
-        splitter = _splitter.Feeder(_vertigo.component())
+        splitter = _splitter.Feeder(_vertigo.component()).start()
     elif _component_type == 'aggregator':
         from . import _aggregator
-        aggregator = _aggregator.Feeder(_vertigo.component())
+        aggregator = _aggregator.Feeder(_vertigo.component()).start()
 
 logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
 

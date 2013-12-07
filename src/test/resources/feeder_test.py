@@ -25,13 +25,6 @@ class FeederTestCase(TestCase):
     network.add_worker('test_worker', worker).add_input('test_feeder')
     return network
 
-  def _create_fail_network(self, feeder):
-    network = vertigo.create_network('test')
-    network.acking = True
-    network.add_feeder('test_feeder', feeder)
-    network.add_worker('test_worker', 'test_failing_worker.py').add_input('test_feeder')
-    return network
-
   def test_feeder_ack(self):
     """
     Tests the basic feeder acking support.

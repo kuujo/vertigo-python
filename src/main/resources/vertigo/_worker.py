@@ -14,12 +14,16 @@
 import org.vertx.java.core.Handler
 import org.vertx.java.core.AsyncResultHandler
 import org.vertx.java.core.json.JsonObject
-from message import Message
+from .message import Message
+from ._component import Component
 from core.javautils import map_to_java
 
-class Worker(object):
+class Worker(Component):
     """A worker component."""
+    type = 'worker'
+
     def __init__(self, worker):
+        super(Worker, self).__init__(worker)
         self._worker = worker
 
     def message_handler(self, handler):
@@ -30,7 +34,7 @@ class Worker(object):
     
         @return: the added handler.
         """
-        self._worker.messageHandler(_MessageHandler(handler, self))
+        self._worker.messageHandler(_MessageHandler(handler))
         return handler
     
     def _convert_data(self, data):
@@ -83,9 +87,8 @@ class Worker(object):
 
 class _MessageHandler(org.vertx.java.core.Handler):
   """A message handler wrapper."""
-  def __init__(self, handler, worker):
+  def __init__(self, handler):
     self._handler = handler
-    self._worker = worker
 
   def handle(self, message):
-    self._handler(Message(message), self._worker)
+    self._handler(Message(message))

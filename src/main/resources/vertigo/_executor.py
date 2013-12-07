@@ -15,14 +15,17 @@ import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
 from message import Message
+from ._component import Component
 
-class Executor(object):
+class Executor(Component):
     """
     A network executor.
     """
+    type = 'executor'
     RETRY_UNLIMITED = -1
 
     def __init__(self, executor):
+        super(Executor, self).__init__(executor)
         self._executor = executor
 
     def set_execute_queue_max_size(self, queue_size):
@@ -133,9 +136,9 @@ class _ResultHandler(org.vertx.java.core.AsyncResultHandler):
     def handle(self, result):
         if self._handler is not None:
             if result.succeeded():
-                self._handler(error=None, result=Message(result.result()))
+                self._handler(None, Message(result.result()))
             else:
-                self._handler(error=result.cause(), result=None)
+                self._handler(result.cause(), None)
 
 class _VoidHandler(org.vertx.java.core.Handler):
     """A void handler."""

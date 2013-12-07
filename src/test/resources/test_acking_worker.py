@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from test import Assert
-import vertigo
+from vertigo import worker
 
-@vertigo.worker.message_handler
-def message_handler(message, worker):
+@worker.message_handler
+def message_handler(message):
     Assert.not_null(message)
     Assert.not_null(message.id)
     Assert.not_null(message.body)
-    Assert.equals('test', message.tag)
     worker.emit(message.body, parent=message)
     worker.ack(message)

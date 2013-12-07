@@ -13,10 +13,13 @@
 # limitations under the License.
 import net.kuujo.vertigo.function.Function
 from .message import Message
+from ._component import Component
 
-class Splitter(object):
+class Splitter(Component):
     """A message splitter."""
+    type = 'splitter'
     def __init__(self, splitter):
+        super(Splitter, self).__init__(splitter)
         self._splitter = splitter
 
     def __call__(self, func):

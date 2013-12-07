@@ -14,13 +14,17 @@
 import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
+from ._component import Component
 
-class Feeder(object):
+class Feeder(Component):
     """A data feeder."""
+    type = 'feeder'
     RETRY_UNLIMITED = -1
+    _start_handler = None
     _ack_handler = None
 
     def __init__(self, feeder):
+        super(Feeder, self).__init__(feeder)
         self._feeder = feeder
 
     def set_feed_queue_max_size(self, queue_size):
@@ -73,8 +77,10 @@ class Feeder(object):
 
         @param handler: A default ack handler to be used when no other ack handler
         is present.
-        @return: self
+        @return: The added handler
         """
+        self._ack_handler = handler
+        return handler
 
     def feed_handler(self, handler):
         """Sets a feed handler on the feeder.
@@ -140,10 +146,7 @@ class _AckHandler(org.vertx.java.core.AsyncResultHandler):
         self._handler = handler
 
     def handle(self, result):
-        if result.succeeded():
-            self._handler(error=None, id=result.result().correlationId())
-        else:
-            self._handler(error=result.cause(), id=result.result().correlationId())
+        self._handler(result.cause(), result.result().correlationId())
 
 class _VoidHandler(org.vertx.java.core.Handler):
     """A void handler."""

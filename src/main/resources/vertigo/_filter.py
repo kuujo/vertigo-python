@@ -13,10 +13,14 @@
 # limitations under the License.
 import net.kuujo.vertigo.function.Function
 from .message import Message
+from ._component import Component
 
-class Filter(object):
+class Filter(Component):
     """A message filter."""
+    type = 'filter'
+
     def __init__(self, filter):
+        super(Filter, self).__init__(filter)
         self._filter = filter
 
     def __call__(self, func):

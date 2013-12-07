@@ -24,7 +24,7 @@ class Message(object):
     @property
     def id(self):
         """The unique message correlation identifier."""
-        return self._message.id().correlationId()
+        return self._message.messageId().correlationId()
 
     @property
     def source(self):
@@ -33,25 +33,25 @@ class Message(object):
 
     def has_parent(self):
         """Indicates whether the message has a parent."""
-        return self._message.id().hasParent()
+        return self._message.messageId().hasParent()
 
     @property
     def parent(self):
         """The unique parent message identifier."""
-        return self._message.id().parent()
+        return self._message.messageId().parent()
 
     def has_root(self):
         """Indicates whether the message has a root."""
-        return self._message.id().hasRoot()
+        return self._message.messageId().hasRoot()
 
     def is_root(self):
         """Indicates whether the message is a root message."""
-        return self._message.id().isRoot()
+        return self._message.messageId().isRoot()
 
     @property
     def root(self):
         """The unique root message identifier."""
-        return self._message.id().root()
+        return self._message.messageId().root()
 
     @property
     def body(self):

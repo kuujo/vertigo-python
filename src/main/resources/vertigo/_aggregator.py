@@ -14,11 +14,13 @@
 import net.kuujo.vertigo.function.Function
 import net.kuujo.vertigo.function.Function2
 from .message import Message
+from ._component import Component
 from core.javautils import map_from_java, map_to_java
 
-class Aggregator(object):
+class Aggregator(Component):
     """A message aggregator."""
     def __init__(self, aggregator):
+        super(Aggregator, self).__init__(aggregator)
         self._aggregator = aggregator
 
     def init(self, func):
