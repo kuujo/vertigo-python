@@ -15,102 +15,77 @@ import org.vertx.java.core.Handler
 import org.vertx.java.core.AsyncResultHandler
 import org.vertx.java.core.json.JsonObject
 from message import Message
-from core.javautils import map_from_java, map_to_java
+from core.javautils import map_to_java
 
-class BasicWorker(object):
-  """A basic worker."""
-  def __init__(self, worker):
-    self._worker = worker
+class Worker(object):
+    """A worker component."""
+    def __init__(self, worker):
+        self._worker = worker
 
-  def message_handler(self, handler):
-    """Sets the worker message handler.
+    def message_handler(self, handler):
+        """Sets the worker message handler.
+    
+        Keyword arguments:
+        @param handler: a handler to be called when a message is received.
+    
+        @return: the added handler.
+        """
+        self._worker.messageHandler(_MessageHandler(handler, self))
+        return handler
+    
+    def _convert_data(self, data):
+        return org.vertx.java.core.json.JsonObject(map_to_java(data))
 
-    Keyword arguments:
-    @param handler: a handler to be called when a message is received.
+    def emit(self, data, stream=None, parent=None):
+        """Emits data to all output streams.
+    
+        Keyword arguments:
+        @param data: The data to emit.
+        @param stream: The stream to which to emit the message. If no stream is
+        provided then the default stream will be used.
+        @param parent: An optional message parent. If a parent message is provided
+               then the emitted message will become a child of this parent.
+    
+        @return: The unique emitted message identifier.
+        """
+        if parent is not None:
+            if stream is not None:
+                return self._worker.emit(stream, self._convert_data(data), parent._message)
+            else:
+                return self._worker.emit(self._convert_data(data), parent._message)
+        else:
+            if stream is not None:
+                return self._worker.emit(stream, self._convert_data(data))
+            else:
+                return self._worker.emit(self._convert_data(data))
+    
+    def ack(self, message):
+        """Acknowledges a message.
+    
+        Keyword arguments:
+        @param message: the message to ack.
+    
+        @return: self
+        """
+        self._worker.ack(message._message)
+        return self
+    
+    def fail(self, message):
+        """Fails a message.
+    
+        Keyword arguments:
+        @param message: the message to fail.
+    
+        @return: self
+        """
+        self._worker.fail(message._message)
+        return self
 
-    @return: the added handler.
-    """
-    self._worker.messageHandler(MessageHandler(handler, self))
-    return handler
-
-  def start(self, handler=None):
-    """Starts the worker.
-
-    Keyword arguments:
-    @param handler: an optional handler to be called when the worker is started.
-
-    @return: self
-    """
-    if handler is not None:
-      self._worker.start(StartHandler(handler, self))
-    else:
-      self._worker.start()
-    return self
-
-  def emit(self, data, parent=None, tag=None):
-    """Emits data to all output streams.
-
-    Keyword arguments:
-    @param data: the data to emit.
-    @param parent: an optional message parent. If a parent message is provided
-           then the emitted message will become a child of this parent.
-    @param tag: a tag to apply to the output message.
-
-    @return: the unique emitted message identifier.
-    """
-    if parent is not None:
-      if tag is not None:
-        return self._worker.emit(self._convert_data(data), tag, parent._message)
-      else:
-        return self._worker.emit(self._convert_data(data), parent._message)
-    else:
-      if tag is not None:
-        return self._worker.emit(self._convert_data(data), tag)
-      else:
-        return self._worker.emit(self._convert_data(data))
-
-  def ack(self, message):
-    """Acknowledges a message.
-
-    Keyword arguments:
-    @param message: the message to ack.
-
-    @return: self
-    """
-    self._worker.ack(message._message)
-    return self
-
-  def fail(self, message):
-    """Fails a message.
-
-    Keyword arguments:
-    @param message: the message to fail.
-
-    @return: self
-    """
-    self._worker.fail(message._message)
-    return self
-
-  def _convert_data(self, data):
-    return org.vertx.java.core.json.JsonObject(map_to_java(data))
-
-class StartHandler(org.vertx.java.core.AsyncResultHandler):
-  """A worker start handler."""
-  def __init__(self, handler, worker):
-    self.handler = handler
-    self.worker = worker
-
-  def handle(self, result):
-    if result.failed():
-      self.handler(result.cause(), self.worker)
-    else:
-      self.handler(None, self.worker)
-
-class MessageHandler(org.vertx.java.core.Handler):
+class _MessageHandler(org.vertx.java.core.Handler):
   """A message handler wrapper."""
   def __init__(self, handler, worker):
-    self.handler = handler
-    self.worker = worker
+    self._handler = handler
+    self._worker = worker
 
   def handle(self, message):
-    self.handler(Message(message), self.worker)
+    self._handler(Message(message), self._worker)

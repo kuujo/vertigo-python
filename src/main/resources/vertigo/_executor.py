@@ -16,225 +16,131 @@ import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
 from message import Message
 
-class _AbstractExecutor(object):
-  def __init__(self, executor):
-    self._executor = executor
-
-  def set_reply_timeout(self, timeout):
-    """The executor result timeout."""
-    self._executor.setReplyTimeout(timeout)
-
-  def get_reply_timeout(self):
-    """The executor result timeout."""
-    return self._executor.getReplyTimeout()
-
-  ack_timeout = property(get_reply_timeout, set_reply_timeout)
-
-  def set_max_queue_size(self, queue_size):
-    """The maximum number of messages that can be in the network at any given time."""
-    self._executor.setMaxQueueSize(queue_size)
-
-  def get_max_queue_size(self):
-    """The maximum number of messages that can be in the network at any given time."""
-    return self._executor.getMaxQueueSize()
-
-  max_queue_size = property(get_max_queue_size, set_max_queue_size)
-
-  def queue_full(self):
-    """Indicates whether the executor queue is full."""
-    return self._executor.queueFull()
-
-  def set_auto_retry(self, retry):
-    """Indicates whether to automatically retry sending failed messages."""
-    self._executor.setAutoRetry(retry)
-
-  def get_auto_retry(self):
-    """Indicates whether to automatically retry sending failed messages."""
-    return self._executor.getAutoRetry()
-
-  auto_retry = property(get_auto_retry, set_auto_retry)
-
-  def set_retry_attempts(self, attempts):
-    """Indicates how many times to retry sending failed messages."""
-    self._executor.setRetryAttempts(attempts)
-
-  def get_retry_attempts(self):
-    """Indicates how many times to retry sending failed messages."""
-    return self._executor.getRetryAttempts()
-
-  retry_attempts = property(get_retry_attempts, set_retry_attempts)
-
-  def start(self, handler=None):
-    """Starts the executor.
-
-    Keyword arguments:
-    @param handler: a handler to be called with the executor once started
-
-    @return: self
+class Executor(object):
     """
-    if handler is not None:
-      self._executor.start(StartHandler(handler, self))
-    else:
-      self._executor.start()
-    return self
-
-  def _convert_data(self, data):
-    return org.vertx.java.core.json.JsonObject(map_to_java(data))
-
-class PollingExecutor(_AbstractExecutor):
-  """A polling executor."""
-  def set_execute_delay(self, delay):
-    """The maximum delay between execution attempts."""
-    self._executor.setExecuteDelay(delay)
-
-  def get_execute_delay(self):
-    """The maximum delay between execution attempts."""
-    return self._executor.getExecuteDelay()
-
-  execute_delay = property(get_execute_delay, set_execute_delay)
-
-  def execute_handler(self, handler):
-    """Registers a execute handler.
-
-    Keyword arguments:
-    @param handler: a handler to be called when the executor is prepared for the next message.
-
-    @return: the added handler.
+    A network executor.
     """
-    self._executor.executeHandler(ExecuteHandler(handler, self))
-    return handler
+    RETRY_UNLIMITED = -1
 
-  def result_handler(self, handler):
-    """Registers an execution result handler.
+    def __init__(self, executor):
+        self._executor = executor
 
-    Keyword arguments:
-    @param handler: a handler to be called when an execution result is received.
+    def set_execute_queue_max_size(self, queue_size):
+        """The maximum number of messages processing at any given time."""
+        self._executor.setExecuteQueueMaxSize(queue_size)
+    
+    def get_execute_queue_max_size(self):
+        """The maximum number of messages processing at any given time."""
+        return self._executor.getExecuteQueueMaxSize()
+    
+    execute_queue_max_size = property(get_execute_queue_max_size, set_execute_queue_max_size)
+    
+    def set_auto_retry(self, retry):
+        """Indicates whether to automatically retry sending failed messages."""
+        self._executor.setAutoRetry(retry)
+    
+    def is_auto_retry(self):
+        """Indicates whether to automatically retry sending failed messages."""
+        return self._executor.isAutoRetry()
+    
+    auto_retry = property(is_auto_retry, set_auto_retry)
+    
+    def set_auto_retry_attempts(self, attempts):
+        """Indicates how many times to retry sending failed messages."""
+        self._executor.setAutoRetryAttempts(attempts)
+    
+    def get_auto_retry_attempts(self):
+        """Indicates how many times to retry sending failed messages."""
+        return self._executor.getAutoRetryAttempts()
+    
+    auto_retry_attempts = property(get_auto_retry_attempts, set_auto_retry_attempts)
 
-    @return: the added handler.
-    """
-    self._executor.resultHandler(ResultHandler(handler))
-    return handler
+    def set_execute_interval(self, interval):
+        """Indicates the interval at which to poll for new messages."""
+        self._executor.setExecuteInterval(interval)
+        return self
 
-  def fail_handler(self, handler):
-    """Registers a fail handler.
+    def get_execute_interval(self):
+        """Indicates the interval at which to poll for new messages."""
+        return self._executor.getExecuteInterval()
 
-    Keyword arguments:
-    @param handler: a handler to be called when an execution failure is received.
+    execute_interval = property(get_execute_interval, set_execute_interval)
+    
+    def execute_queue_full(self):
+        """Indicates whether the executor queue is full."""
+        return self._executor.feedQueueFull()
 
-    @return: the added handler.
-    """
-    self._executor.failHandler(FailTimeoutHandler(handler))
-    return handler
+    def execute_handler(self, handler):
+        """Sets a feed handler on the feeder.
 
-  def timeout_handler(self, handler):
-    """Registers a timeout handler.
+        @param handler: A handler to be called with the executor as its only argument.
+        @return: The executor instance.
+        """
+        self._executor.executeHandler(_ExecuteHandler(handler, self))
+        return self
 
-    Keyword arguments:
-    @param handler: a handler to be called when an execution timeout is received.
+    def drain_handler(self, handler):
+        """Sets a drain handler on the executor.
 
-    @return: the added handler.
-    """
-    self._executor.timeoutHandler(FailTimeoutHandler(handler))
-    return handler
+        @param handler: A handler to be called when the executor is prepared to
+        accept new message.
+        @return: The executor instance.
+        """
+        self._executor.drainHandler(_VoidHandler(handler))
+        return self
 
-  def execute(self, data, tag=None):
-    """Executes rpc on the network.
+    def _convert_data(self, data):
+        return org.vertx.java.core.json.JsonObject(map_to_java(data))
 
-    Keyword arguments:
-    @param data: the data to emit.
-    @param tag: an optional tag to apply to the output data.
+    def execute(self, data, stream=None, handler=None):
+        """Performs an execution.
 
-    @return: the unique output message identifier.
-    """
-    if tag is not None:
-      return self._executor.execute(self._convert_data(data), tag)
-    else:
-      return self._executor.execute(self._convert_data(data))
+        @param data: The dictionary data to emit.
+        @param stream: An optional stream to which to emit the data. If no stream
+        is provided then the default stream will be used.
+        @param handler: An asynchronous result handler. The handler will be called
+        with the execution result once the message has been fully processed. If
+        multiple results are received for the execution then the handler will be
+        called multiple times.
 
-class StreamExecutor(_AbstractExecutor):
-  """
-  A stream executor.
-  """
-  def drain_handler(self, handler):
-    """
-    Registers a drain handler.
-    """
-    self._executor.drainHandler(VoidHandler(handler))
-    return handler
+        @return: The feeder instance.
+        """
+        if stream is not None:
+            if handler is not None:
+                self._executor.execute(stream, self._convert_data(data), _ResultHandler(handler)).correlationId()
+            else:
+                self._executor.execute(stream, self._convert_data(data), _ResultHandler(None)).correlationId()
+        else:
+            if handler is not None:
+                self._executor.execute(self._convert_data(data), _ResultHandler(handler)).correlationId()
+            else:
+                self._executor.execute(self._convert_data(data), _ResultHandler(None))
 
-  def execute(self, data, tag=None, handler=None):
-    """Executes rpc on the network.
+class _ExecuteHandler(org.vertx.java.core.Handler):
+    """An execute handler."""
+    def __init__(self, handler, executor):
+        self._handler = handler
+        self._executor = executor
 
-    Keyword arguments:
-    @param data: the data to emit.
-    @param tag: an optional tag to apply to the output data.
-    @param handler: an asynchronous result handler to be called with the result or failure
+    def handle(self, executor):
+        self._handler(self.executor)
 
-    @return: the unique output message identifier.
-    """
-    if handler is not None:
-      if tag is not None:
-        return self._executor.execute(self._convert_data(data), tag, ExecuteResultHandler(handler))
-      else:
-        return self._executor.execute(self._convert_data(data), ExecuteResultHandler(handler))
-    else:
-      if tag is not None:
-        return self._executor.execute(self._convert_data(data), tag)
-      else:
-        return self._executor.execute(self._convert_data(data))
+class _ResultHandler(org.vertx.java.core.AsyncResultHandler):
+    """An asynchronous result handler."""
+    def __init__(self, handler):
+        self._handler = handler
 
-class StartHandler(org.vertx.java.core.AsyncResultHandler):
-  """A start handler."""
-  def __init__(self, handler, executor):
-    self.handler = handler
-    self.executor = executor
+    def handle(self, result):
+        if self._handler is not None:
+            if result.succeeded():
+                self._handler(None, Message(result.result()))
+            else:
+                self._handler(result.cause(), None)
 
-  def handle(self, result):
-    if result.succeeded():
-      self.handler(None, self.executor)
-    else:
-      self.handler(result.cause(), self.executor)
+class _VoidHandler(org.vertx.java.core.Handler):
+    """A void handler."""
+    def __init__(self, handler):
+        self.handler = handler
 
-class ResultHandler(org.vertx.java.core.Handler):
-  """A synchronous result handler."""
-  def __init__(self, handler):
-    self.handler = handler
-
-  def handle(self, result):
-    self.handler(Message(result))
-
-class FailTimeoutHandler(org.vertx.java.core.Handler):
-  """A fail/timeout handler."""
-  def __init__(self, handler):
-    self.handler = handler
-
-  def handle(self, messageid):
-    self.handler(messageid)
-
-class ExecuteResultHandler(org.vertx.java.core.AsyncResultHandler):
-  """An execute result handler."""
-  def __init__(self, handler):
-    self.handler = handler
-
-  def handle(self, result):
-    if result.succeeded():
-      self.handler(None, Message(result.result()))
-    else:
-      self.handler(result.cause(), None)
-
-class ExecuteHandler(org.vertx.java.core.Handler):
-  """An execute handler."""
-  def __init__(self, handler, executor):
-    self.handler = handler
-    self.executor = executor
-
-  def handle(self, executor):
-    self.handler(self.executor)
-
-class VoidHandler(org.vertx.java.core.Handler):
-  """A void handler."""
-  def __init__(self, handler):
-    self.handler = handler
-
-  def handle(self, void):
-    self.handler()
+    def handle(self, void):
+        self.handler()

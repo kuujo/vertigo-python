@@ -15,213 +15,129 @@ import org.vertx.java.core.Handler
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
 
-class _AbstractFeeder(object):
-  RETRY_UNLIMITED = -1
+class Feeder(object):
+    """A data feeder."""
+    RETRY_UNLIMITED = -1
 
-  def __init__(self, feeder):
-    self._feeder = feeder
+    def __init__(self, feeder):
+        self._feeder = feeder
 
-  def set_max_queue_size(self, queue_size):
-    """The maximum number of messages processing at any given time."""
-    self._feeder.setMaxQueueSize(queue_size)
+    def set_feed_queue_max_size(self, queue_size):
+        """The maximum number of messages processing at any given time."""
+        self._feeder.setFeedQueueMaxSize(queue_size)
+    
+    def get_feed_queue_max_size(self):
+        """The maximum number of messages processing at any given time."""
+        return self._feeder.getFeedQueueMaxSize()
+    
+    max_queue_size = property(get_feed_queue_max_size, set_feed_queue_max_size)
+    
+    def set_auto_retry(self, retry):
+        """Indicates whether to automatically retry sending failed messages."""
+        self._feeder.setAutoRetry(retry)
+    
+    def is_auto_retry(self):
+        """Indicates whether to automatically retry sending failed messages."""
+        return self._feeder.isAutoRetry()
+    
+    auto_retry = property(is_auto_retry, set_auto_retry)
+    
+    def set_auto_retry_attempts(self, attempts):
+        """Indicates how many times to retry sending failed messages."""
+        self._feeder.setAutoRetryAttempts(attempts)
+    
+    def get_auto_retry_attempts(self):
+        """Indicates how many times to retry sending failed messages."""
+        return self._feeder.getAutoRetryAttempts()
+    
+    auto_retry_attempts = property(get_auto_retry_attempts, set_auto_retry_attempts)
 
-  def get_max_queue_size(self):
-    """The maximum number of messages processing at any given time."""
-    return self._feeder.getMaxQueueSize()
+    def set_feed_interval(self, interval):
+        """Indicates the interval at which to poll for new messages."""
+        self._executor.setFeedInterval(interval)
+        return self
 
-  max_queue_size = property(get_max_queue_size, set_max_queue_size)
+    def get_feed_interval(self):
+        """Indicates the interval at which to poll for new messages."""
+        return self._executor.getFeedInterval()
 
-  def set_auto_retry(self, retry):
-    """Indicates whether to automatically retry sending failed messages."""
-    self._feeder.setAutoRetry(retry)
+    feed_interval = property(get_feed_interval, set_feed_interval)
+    
+    def feed_queue_full(self):
+        """Indicates whether the feeder queue is full."""
+        return self._feeder.feedQueueFull()
 
-  def get_auto_retry(self):
-    """Indicates whether to automatically retry sending failed messages."""
-    return self._feeder.getAutoRetry()
+    def feed_handler(self, handler):
+        """Sets a feed handler on the feeder.
 
-  auto_retry = property(get_auto_retry, set_auto_retry)
+        @param handler: A handler to be called with the feeder as its only argument.
+        @return: The feeder instance.
+        """
+        self._feeder.feedHandler(_FeedHandler(handler, self))
+        return self
 
-  def set_retry_attempts(self, attempts):
-    """Indicates how many times to retry sending failed messages."""
-    self._feeder.setRetryAttempts(attempts)
+    def drain_handler(self, handler):
+        """Sets a drain handler on the feeder.
 
-  def get_retry_attempts(self):
-    """Indicates how many times to retry sending failed messages."""
-    return self._feeder.getRetryAttempts()
+        @param handler: A handler to be called when the feeder is prepared to
+        accept new message.
+        @return: The feeder instance.
+        """
+        self._feeder.drainHandler(_VoidHandler(handler))
+        return self
 
-  retry_attempts = property(get_retry_attempts, set_retry_attempts)
+    def _convert_data(self, data):
+        return org.vertx.java.core.json.JsonObject(map_to_java(data))
 
-  def queue_full(self):
-    """Indicates whether the feeder queue is full."""
-    return self._feeder.queueFull()
+    def emit(self, data, stream=None, handler=None):
+        """Emits a message from the feeder.
 
-  def start(self, handler=None):
-    """Starts the feeder.
+        @param data: A dictionary of data to emit.
+        @param stream: An optional stream to which to emit the data. If no stream
+        is provided then the data will be emitted to the default stream.
+        @param handler: An optional asynchronous handler to be called once the
+        message has been fully processed. Feeders implement a special type of
+        ack handler. Whether the message is successfully processed or fails,
+        the second argument to the ack handler will always be the unique message
+        correlation identifier.
 
-    Keyword arguments:
-    @param handler: an asynchronous start handler to be invoked once the feeder is started.
+        @return: The unique emitted message correlation identifier.
+        """
+        if stream is not None:
+            if handler is not None:
+                return self._feeder.emit(stream, self._convert_data(data), _AckHandler(handler)).correlationId()
+            else:
+                return self._feeder.emit(stream, self._convert_data(data)).correlationId()
+        else:
+            if handler is not None:
+                return self._feeder.emit(self._convert_data(data), _AckHandler(handler)).correlationId()
+            else:
+                return self._feeder.emit(self._convert_data(data)).correlationId()
 
-    @return self
-    """
-    if handler is not None:
-      self._feeder.start(StartHandler(handler, self))
-    else:
-      self._feeder.start()
-    return self
+class _FeedHandler(org.vertx.java.core.Handler):
+    """A feed handler."""
+    def __init__(self, handler, feeder):
+        self._handler = handler
+        self._feeder = feeder
 
-  def _convert_data(self, data):
-    return org.vertx.java.core.json.JsonObject(map_to_java(data))
+    def handle(self, feeder):
+        self._handler(self.feeder)
 
-class BasicFeeder(_AbstractFeeder):
-  """A basic feeder."""
-  def emit(self, data, tag=None):
-    """Emits data from the feeder.
+class _AckHandler(org.vertx.java.core.AsyncResultHandler):
+    """An ack handler."""
+    def __init__(self, handler):
+        self._handler = handler
 
-    Keyword arguments:
-    @param data: the data to emit.
-    @param tag: a tag to apply to the emitted message.
+    def handle(self, result):
+        if result.succeeded():
+            self._handler(None, result.result().correlationId())
+        else:
+            self._handler(result.cause(), result.result().correlationId())
 
-    @return: the unique message identifier
-    """
-    if tag is not None:
-      return self._feeder.emit(self._convert_data(data), tag)
-    else:
-      return self._feeder.emit(self._convert_data(data))
+class _VoidHandler(org.vertx.java.core.Handler):
+    """A void handler."""
+    def __init__(self, handler):
+        self.handler = handler
 
-class PollingFeeder(BasicFeeder):
-  """A polling feeder."""
-  def set_feed_delay(self, delay):
-    """The maximum interval to wait between attempting feeds."""
-    self._feeder.setFeedDelay(delay)
-
-  def get_feed_delay(self):
-    """The maximum interval to wait between attempting feeds."""
-    return self._feeder.getFeedDelay()
-
-  feed_delay = property(get_feed_delay, set_feed_delay)
-
-  def feed_handler(self, handler):
-    """Registers a feed handler.
-
-    Keyword arguments:
-    @param handler: a handler to be invoked when the feeder is prepared for new messages
-
-    @return: the added handler
-    """
-    self._feeder.feedHandler(FeedHandler(handler, self))
-    return handler
-
-  def ack_handler(self, handler):
-    """Registers an ack handler on the feeder.
-
-    Keyword arguments:
-    @param handler: a handler to be called when a message is acked with the message id.
-
-    @return: the added handler
-    """
-    self._feeder.ackHandler(AckFailTimeoutHandler(handler))
-    return handler
-
-  def fail_handler(self, handler):
-    """Registers a fail handler on the feeder.
-
-    Keyword arguments:
-    @param handler: a handler to be called when a message is failed with the message id.
-
-    @return: the added handler
-    """
-    self._feeder.failHandler(AckFailTimeoutHandler(handler))
-    return handler
-
-  def timeout_handler(self, handler):
-    """Registers a timeout handler on the feeder.
-
-    Keyword arguments:
-    @param handler: a handler to be called when a message times out with the message id.
-
-    @return: the added handler
-    """
-    self._feeder.timeoutHandler(AckFailTimeoutHandler(handler))
-    return handler
-
-class StreamFeeder(_AbstractFeeder):
-  """A stream feeder."""
-  def drain_handler(self, handler):
-    """Registers a drain handler.
-
-    Keyword arguments:
-    @param handler: a handler to be called when the feeder is prepared for new messages.
-
-    @return: the added handler.
-    """
-    self._feeder.drainHandler(VoidHandler(handler))
-    return handler
-
-  def emit(self, data, tag=None, handler=None):
-    """Emits data from the feeder.
-
-    Keyword arguments:
-    @param data: the data to emit.
-    @param tag: a tag to apply to the emitted message.
-    @param handler: an asynchronous handler to be called once the message is acked.
-
-    @return: the new message identifier.
-    """
-    if handler is not None:
-      if tag is not None:
-        return self._feeder.emit(self._convert_data(data), tag, FeedResultHandler(handler))
-      else:
-        return self._feeder.emit(self._convert_data(data), FeedResultHandler(handler))
-    else:
-      if tag is not None:
-        return self._feeder.emit(self._convert_data(data), tag)
-      else:
-        return self._feeder.emit(self._convert_data(data))
-
-class StartHandler(org.vertx.java.core.AsyncResultHandler):
-  """A start handler."""
-  def __init__(self, handler, feeder):
-    self.handler = handler
-    self.feeder = feeder
-
-  def handle(self, result):
-    if result.succeeded():
-      self.handler(None, self.feeder)
-    else:
-      self.handler(result.cause(), self.feeder)
-
-class AckFailTimeoutHandler(org.vertx.java.core.Handler):
-  """An ack/fail/timeout handler."""
-  def __init__(self, handler):
-    self.handler = handler
-
-  def handle(self, messageid):
-    self.handler(messageid)
-
-class FeedResultHandler(org.vertx.java.core.AsyncResultHandler):
-  """A feed result handler."""
-  def __init__(self, handler):
-    self.handler = handler
-
-  def handle(self, result):
-    if result.succeeded():
-      self.handler(None)
-    else:
-      self.handler(result.cause())
-
-class FeedHandler(org.vertx.java.core.Handler):
-  """A feed handler."""
-  def __init__(self, handler, feeder):
-    self.handler = handler
-    self.feeder = feeder
-
-  def handle(self, feeder):
-    self.handler(self.feeder)
-
-class VoidHandler(org.vertx.java.core.Handler):
-  """A void handler."""
-  def __init__(self, handler):
-    self.handler = handler
-
-  def handle(self, void):
-    self.handler()
+    def handle(self, void):
+        self.handler()

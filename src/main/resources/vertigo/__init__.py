@@ -39,17 +39,23 @@ _vertigo = _setup_vertigo()
 if _vertigo.isComponent():
     _component_type = net.kuujo.vertigo.util.Component.serializeType(vertigo.context().getComponent().getType())
     if _component_type == 'feeder':
-        feeder = importlib.import_module('_feeder')
+        from . import _feeder
+        feeder = _feeder.Feeder(_vertigo.component())
     elif _component_type == 'executor':
-        executor = importlib.import_module('_executor')
+        from . import _executor
+        executor = _executor.Executor(_vertigo.component())
     elif _component_type == 'worker':
-        worker = importlib.import_module('_worker')
+        from . import _worker
+        worker = _worker.Worker(_vertigo.component())
     elif _component_type == 'filter':
-        filter = importlib.import_module('_filter')
+        from . import _filter
+        filter = _filter.Filter(_vertigo.component())
     elif _component_type == 'splitter':
-        splitter = importlib.import_module('_splitter')
+        from . import _splitter
+        splitter = _splitter.Feeder(_vertigo.component())
     elif _component_type == 'aggregator':
-        aggregator = importlib.import_module('_aggregator')
+        from . import _aggregator
+        aggregator = _aggregator.Feeder(_vertigo.component())
 
 logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
 
