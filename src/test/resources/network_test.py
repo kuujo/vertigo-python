@@ -14,7 +14,6 @@
 from test import TestCase, run_test
 import vertigo
 from vertigo.grouping import RoundGrouping
-from vertigo.filter import TagsFilter
 
 class NetworkTestCase(TestCase):
   """
@@ -38,12 +37,12 @@ class NetworkTestCase(TestCase):
     self.assert_equals(1000, network.ack_delay)
     network.num_auditors = 2
     self.assert_equals(2, network.num_auditors)
-    component1 = network.add_verticle('test_feeder_verticle', main='test_feeder_verticle.py')
+    component1 = network.add_feeder('test_feeder_verticle', main='test_feeder_verticle.py')
     self.assert_equals('test_feeder_verticle', component1.address)
     self.assert_equals('test_feeder_verticle.py', component1.main)
     component1.instances = 4
     self.assert_equals(4, component1.instances)
-    component2 = network.add_verticle('test_worker_verticle')
+    component2 = network.add_worker('test_worker_verticle')
     self.assert_equals('verticle', component2.type)
     component2.main = 'test_worker_verticle.py'
     self.assert_equals('test_worker_verticle.py', component2.main)
@@ -54,8 +53,8 @@ class NetworkTestCase(TestCase):
     Tests adding inputs to components.
     """
     network = vertigo.create_network('test')
-    component1 = network.add_verticle('test_feeder_verticle', main='test_feeder_verticle.py')
-    component2 = network.add_verticle('test_worker_verticle', main='test_worker_verticle.py', instances=2)
+    component1 = network.add_feeder('test_feeder_verticle', main='test_feeder_verticle.py')
+    component2 = network.add_worker('test_worker_verticle', main='test_worker_verticle.py', instances=2)
     component2.add_input('test_feeder_verticle')
     self.assert_equals(0, len(component1.inputs))
     self.assert_equals(1, len(component2.inputs))

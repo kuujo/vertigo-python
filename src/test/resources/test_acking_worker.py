@@ -14,21 +14,11 @@
 from test import Assert
 import vertigo
 
-worker = vertigo.create_worker()
-
-def worker_start(error, worker):
-  if error:
-    Assert.true(False)
-  else:
-    Assert.not_null(worker)
-
-@worker.message_handler
-def handle_message(message, worker):
-  Assert.not_null(message)
-  Assert.not_null(message.id)
-  Assert.not_null(message.body)
-  Assert.equals('test', message.tag)
-  worker.emit(message.body, parent=message)
-  worker.ack(message)
-
-worker.start(worker_start)
+@vertigo.worker.message_handler
+def message_handler(message, worker):
+    Assert.not_null(message)
+    Assert.not_null(message.id)
+    Assert.not_null(message.body)
+    Assert.equals('test', message.tag)
+    worker.emit(message.body, parent=message)
+    worker.ack(message)

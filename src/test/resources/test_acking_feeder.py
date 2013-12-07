@@ -14,18 +14,8 @@
 from test import Assert, Test
 import vertx, vertigo
 
-feeder = vertigo.create_stream_feeder()
+def ack_handler(result, error=None):
+    Assert.null(error)
+    Test.complete()
 
-def start_handler(error, feeder):
-  if error:
-    Assert.true(False)
-  else:
-    def ack_handler(error=None):
-      Assert.null(error)
-      Test.complete()
-
-    def do_feed(timer_id):
-      feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
-    vertx.set_timer(1000, do_feed)
-
-feeder.start(start_handler)
+vertigo.feeder.feed({'body': 'Hello world!'}, handler=ack_handler)

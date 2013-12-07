@@ -12,17 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from test import Assert, Test
-import vertigo
+import vertx, vertigo
 
-feeder = vertigo.create_stream_feeder()
+def ack_handler(result, error=None):
+    Assert.not_null(error)
+    Test.complete()
 
-def start_handler(error, feeder):
-  if error:
-    Assert.true(False)
-  else:
-    def ack_handler(error=None):
-      Assert.not_null(error)
-      Test.complete()
-    feeder.emit({'body': 'Hello world!'}, tag='test', handler=ack_handler)
-
-feeder.start(start_handler)
+vertigo.feeder.feed({'body': 'Hello world!'}, handler=ack_handler)

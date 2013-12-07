@@ -18,6 +18,7 @@ from core.javautils import map_from_java, map_to_java
 class Feeder(object):
     """A data feeder."""
     RETRY_UNLIMITED = -1
+    _ack_handler = None
 
     def __init__(self, feeder):
         self._feeder = feeder
@@ -67,6 +68,14 @@ class Feeder(object):
         """Indicates whether the feeder queue is full."""
         return self._feeder.feedQueueFull()
 
+    def ack_handler(self, handler):
+        """Sets a default ack handler on the feeder.
+
+        @param handler: A default ack handler to be used when no other ack handler
+        is present.
+        @return: self
+        """
+
     def feed_handler(self, handler):
         """Sets a feed handler on the feeder.
 
@@ -81,7 +90,7 @@ class Feeder(object):
 
         @param handler: A handler to be called when the feeder is prepared to
         accept new message.
-        @return: The feeder instance.
+        @return: self
         """
         self._feeder.drainHandler(_VoidHandler(handler))
         return self
@@ -103,6 +112,8 @@ class Feeder(object):
 
         @return: The unique emitted message correlation identifier.
         """
+        if handler is None and self._ack_handler is not None:
+            handler = self._ack_handler
         if stream is not None:
             if handler is not None:
                 return self._feeder.emit(stream, self._convert_data(data), _AckHandler(handler)).correlationId()
@@ -130,9 +141,9 @@ class _AckHandler(org.vertx.java.core.AsyncResultHandler):
 
     def handle(self, result):
         if result.succeeded():
-            self._handler(None, result.result().correlationId())
+            self._handler(error=None, id=result.result().correlationId())
         else:
-            self._handler(result.cause(), result.result().correlationId())
+            self._handler(error=result.cause(), id=result.result().correlationId())
 
 class _VoidHandler(org.vertx.java.core.Handler):
     """A void handler."""

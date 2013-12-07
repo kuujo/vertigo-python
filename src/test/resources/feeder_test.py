@@ -12,91 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from test import TestCase, run_test
-from vertigo.cluster import LocalCluster, ViaCluster
 import vertigo
 
 class FeederTestCase(TestCase):
   """
   A feeder test case.
   """
-  def _create_ack_network(self, feeder):
+  def _create_network(self, feeder, worker):
     network = vertigo.create_network('test')
     network.acking = True
-    network.add_verticle('test_feeder', feeder)
-    network.add_verticle('test_worker', 'test_acking_worker.py').add_input('test_feeder')
+    network.add_feeder('test_feeder', feeder)
+    network.add_worker('test_worker', worker).add_input('test_feeder')
     return network
 
   def _create_fail_network(self, feeder):
     network = vertigo.create_network('test')
     network.acking = True
-    network.add_verticle('test_feeder', feeder)
-    network.add_verticle('test_worker', 'test_failing_worker.py').add_input('test_feeder')
+    network.add_feeder('test_feeder', feeder)
+    network.add_worker('test_worker', 'test_failing_worker.py').add_input('test_feeder')
     return network
 
-  def test_basic_feeder_ack(self):
+  def test_feeder_ack(self):
     """
     Tests the basic feeder acking support.
     """
-    network = self._create_ack_network('test_acking_feeder.py')
-    cluster = LocalCluster()
+    network = self._create_network('test_acking_feeder.py', 'test_acking_worker.py')
     def deploy_handler(error, context):
       self.assert_null(error)
       self.assert_not_null(context)
-    cluster.deploy(network, deploy_handler)
+    vertigo.deploy_local_network(network, deploy_handler)
 
-  def test_basic_feeder_fail(self):
+  def test_feeder_fail(self):
     """
     Tests the basic feeder fail support.
     """
-    network = self._create_fail_network('test_failing_feeder.py')
-    cluster = LocalCluster()
+    network = self._create_network('test_failing_feeder.py', 'test_failing_worker.py')
     def deploy_handler(error, context):
       self.assert_null(error)
       self.assert_not_null(context)
-    cluster.deploy(network, deploy_handler)
-
-  def test_polling_feeder_ack(self):
-    """
-    Tests the polling feeder acking support.
-    """
-    network = self._create_ack_network('test_acking_polling_feeder.py')
-    cluster = LocalCluster()
-    def deploy_handler(error, context):
-      self.assert_null(error)
-      self.assert_not_null(context)
-    cluster.deploy(network, deploy_handler)
-
-  def test_polling_feeder_fail(self):
-    """
-    Tests the polling feeder fail support.
-    """
-    network = self._create_fail_network('test_failing_polling_feeder.py')
-    cluster = LocalCluster()
-    def deploy_handler(error, context):
-      self.assert_null(error)
-      self.assert_not_null(context)
-    cluster.deploy(network, deploy_handler)
-
-  def test_stream_feeder_ack(self):
-    """
-    Tests the stream feeder acking support.
-    """
-    network = self._create_ack_network('test_acking_stream_feeder.py')
-    cluster = LocalCluster()
-    def deploy_handler(error, context):
-      self.assert_null(error)
-      self.assert_not_null(context)
-    cluster.deploy(network, deploy_handler)
-
-  def test_stream_feeder_fail(self):
-    """
-    Tests the stream feeder fail support.
-    """
-    network = self._create_fail_network('test_failing_stream_feeder.py')
-    cluster = LocalCluster()
-    def deploy_handler(error, context):
-      self.assert_null(error)
-      self.assert_not_null(context)
-    cluster.deploy(network, deploy_handler)
+    vertigo.deploy_local_network(network, deploy_handler)
 
 run_test(FeederTestCase())

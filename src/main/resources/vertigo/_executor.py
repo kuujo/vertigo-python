@@ -133,9 +133,9 @@ class _ResultHandler(org.vertx.java.core.AsyncResultHandler):
     def handle(self, result):
         if self._handler is not None:
             if result.succeeded():
-                self._handler(None, Message(result.result()))
+                self._handler(error=None, result=Message(result.result()))
             else:
-                self._handler(result.cause(), None)
+                self._handler(error=result.cause(), result=None)
 
 class _VoidHandler(org.vertx.java.core.Handler):
     """A void handler."""
