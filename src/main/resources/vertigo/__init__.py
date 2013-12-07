@@ -11,71 +11,142 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from network import Network
-from worker import BasicWorker
-from feeder import BasicFeeder, PollingFeeder, StreamFeeder
-from rpc import PollingExecutor, StreamExecutor
-import net.kuujo.vertigo.Vertigo
+import sys, importlib
+import net.kuujo.vertigo.util.Context
+import net.kuujo.vertigo.DefaultVertigoFactory
+import net.kuujo.vertigo.component.DefaultComponentFactory
 import org.vertx.java.platform.impl.JythonVerticleFactory
+from context import NetworkContext, InstancContext
 
-vertigo = net.kuujo.vertigo.Vertigo(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
+this = sys.modules[__name__]
+
+current_context = None
+_context = net.kuujo.vertigo.util.Context.parseContext(org.vertx.java.platform.impl.JythonVerticleFactory.config())
+if _context is not None:
+    current_context = InstanceContext(_context)
+
+def _setup_vertigo(context):
+    vertx = org.vertx.java.platform.impl.JythonVerticleFactory.vertx
+    container = org.vertx.java.platform.impl.JythonVerticleFactory.container
+    factory = net.kuujo.vertigo.DefaultVertigoFactory(vertx, container)
+    if current_context is not None:
+        component_factory = net.kuujo.vertigo.component.DefaultComponentFactory(vertx, container)
+        return factory.createVertigo(component_factory.createComponent(current_context._context))
+    else:
+        return factory.createVertigo()
+
+_vertigo = _setup_vertigo()
+if _vertigo.isComponent():
+    _component_type = net.kuujo.vertigo.util.Component.serializeType(vertigo.context().getComponent().getType())
+    if _component_type == 'feeder':
+        feeder = importlib.import_module('_feeder')
+    elif _component_type == 'executor':
+        executor = importlib.import_module('_executor')
+    elif _component_type == 'worker':
+        worker = importlib.import_module('_worker')
+    elif _component_type == 'filter':
+        filter = importlib.import_module('_filter')
+    elif _component_type == 'splitter':
+        splitter = importlib.import_module('_splitter')
+    elif _component_type == 'aggregator':
+        aggregator = importlib.import_module('_aggregator')
+
+logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
 
 def is_component():
-  """
-  Indicates whether the current verticle is a Vertigo component instance.
-  """
-  return vertigo.isComponent()
+    """
+    Indicates whether the current verticle is a Vertigo component instance.
+
+    @return: A boolean indicating whether the current Vert.x verticle is
+    a Vertigo component instance.
+    """
+    return _vertigo.isComponent()
 
 def create_network(address):
-  """
-  Creates a new network.
-  """
-  return Network(address)
+    """
+    Creates a new network.
 
-def create_feeder():
-  """
-  Creates a basic feeder.
-  """
-  return create_basic_feeder()
+    @param address: The network address.
+    @return: A new network instance.
+    """
+    return Network(_vertigo.createNetwork(address))
 
-def create_basic_feeder():
-  """
-  Creates a basic feeder.
-  """
-  return BasicFeeder(vertigo.createBasicFeeder())
+def deploy_local_network(network, handler=None):
+    """
+    Deploys a local network.
 
-def create_polling_feeder():
-  """
-  Creates a polling feeder.
-  """
-  return PollingFeeder(vertigo.createPollingFeeder())
+    @param network: The network to deploy.
+    @param handler: An optional asynchronous handler to be called once the deployment
+    is complete.
+    @return: The current vertigo instance.
+    """
+    if handler is not None:
+        _vertigo.deployLocalNetwork(network._network, _DeployHandler(handler))
+    else:
+        _vertigo.deployLocalNetwork(network._network)
+    return this
 
-def create_stream_feeder():
-  """
-  Creates a stream feeder.
-  """
-  return StreamFeeder(vertigo.createStreamFeeder())
+def shutdown_local_network(context, handler=None):
+    """
+    Shuts down a local network.
 
-def create_polling_executor():
-  """
-  Creates a polling executor.
-  """
-  return PollingExecutor(vertigo.createPollingExecutor())
+    @param context: The network context for the network to shutdown.
+    @param handler: An optional asynchronous handler to be called once the shutdown
+    is complete.
+    @return: The current vertigo instance.
+    """
+    if handler is not None:
+        _vertigo.shutdownLocalNetwork(context._context, _ShutdownHandler(handler))
+    else:
+        _vertigo.shutdownLocalNetwork(context._context)
+    return this
 
-def create_stream_executor():
-  """
-  Creates a stream executor.
-  """
-  return StreamExecutor(vertigo.createStreamExecutor())
+def deploy_remote_network(address, network, handler=None):
+    """
+    Deploys a remote network.
 
-def create_worker():
-  """
-  Creates a basic worker.
-  """
-  return create_basic_worker()
+    @param address: The event bus address to which to deploy modules and verticles.
+    @param network: The network to deploy.
+    @param handler: An optional asynchronous handler to be called once the deployment
+    is complete.
+    @return: The current vertigo instance.
+    """
+    if handler is not None:
+        _vertigo.deployRemoteNetwork(address, network._network, _DeployHandler(handler))
+    else:
+        _vertigo.deployRemoteNetwork(address, network._network)
+    return this
 
-def create_basic_worker():
-  """
-  Creates a basic worker.
-  """
-  return BasicWorker(vertigo.createBasicWorker())
+def shutdown_remote_network(address, context, handler=None):
+    """
+    Shuts down a remote network.
+
+    @param address: The event bus address to which to deploy modules and verticles.
+    @param context: The network context for the network to shutdown.
+    @param handler: An optional asynchronous handler to be called once the shutdown
+    is complete.
+    @return: The current vertigo instance.
+    """
+    if handler is not None:
+        _vertigo.shutdownRemoteNetwork(address, context._context, _ShutdownHandler(handler))
+    else:
+        _vertigo.shutdownRemoteNetwork(address, context._context)
+    return this
+
+class _DeployHandler(org.vertx.java.core.AsyncResultHandler):
+    def __init__(self, handler):
+        self._handler = handler
+    def handle(self, result):
+        if result.succeeded():
+            self._handler(None, NetworkContext(result.result()))
+        else:
+            self._handler(result.cause(), None)
+
+class _ShutdownHandler(org.vertx.java.core.AsyncResultHandler):
+    def __init__(self, handler):
+        self._handler = handler
+    def handle(self, result):
+        if result.succeeded():
+            self._handler(None)
+        else:
+            self._handler(result.cause())

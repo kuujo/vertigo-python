@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import net.kuujo.vertigo.context.NetworkContext
+import net.kuujo.vertigo.util.Component
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_from_java, map_to_java
 
@@ -78,7 +79,7 @@ class ComponentContext(_AbstractContext):
   @property
   def type(self):
     """The component type."""
-    return self._context.getType()
+    return net.kuujo.vertigo.util.Component.serializeType(self._context.getType())
 
   @property
   def is_module(self):
