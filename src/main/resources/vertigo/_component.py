@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import org.vertx.java.core.AsyncResultHandler
+import net.kuujo.vertigo.message.schema.MessageSchema
+
+from . import is_component
+if not is_component():
+    raise ImportError("Not a Vertigo component instance.")
 
 class Component(object):
     """A base component."""
@@ -21,6 +26,18 @@ class Component(object):
         self._component = component
         self._start_handler, self._start_result = None, None
         self.__start_handler = _StartHandler(self)
+
+    def declare_streams(self, streams):
+        """Declares component output streams."""
+        self._component.declareStreams(streams)
+
+    streams = property(lambda: None, declare_streams)
+
+    def declare_schema(self, fields):
+        """Declares a schema for the component."""
+        self._component.declareSchema(net.kuujo.vertigo.message.schema.MessageSchema(fields))
+
+    schema = property(lambda: None, declare_schema)
 
     def start_handler(self, handler):
         """Sets a start handler on the component.

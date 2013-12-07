@@ -37,6 +37,16 @@ def _setup_vertigo():
         return factory.createVertigo()
 
 _vertigo = _setup_vertigo()
+
+def is_component():
+    """
+    Indicates whether the current verticle is a Vertigo component instance.
+
+    @return: A boolean indicating whether the current Vert.x verticle is
+    a Vertigo component instance.
+    """
+    return _vertigo.isComponent()
+
 if _vertigo.isComponent():
     _component_type = net.kuujo.vertigo.util.Component.serializeType(_vertigo.context().getComponent().getType())
     if _component_type == 'feeder':
@@ -59,15 +69,6 @@ if _vertigo.isComponent():
         aggregator = _aggregator.Feeder(_vertigo.component()).start()
 
 logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
-
-def is_component():
-    """
-    Indicates whether the current verticle is a Vertigo component instance.
-
-    @return: A boolean indicating whether the current Vert.x verticle is
-    a Vertigo component instance.
-    """
-    return _vertigo.isComponent()
 
 def create_network(address):
     """
