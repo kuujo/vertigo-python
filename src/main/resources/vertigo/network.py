@@ -14,8 +14,10 @@
 import net.kuujo.vertigo.network.Network
 import net.kuujo.vertigo.network.Component
 import net.kuujo.vertigo.hooks.EventBusHook
+import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.json.JsonObject
 from core.javautils import map_to_java
+from context import InstanceContext
 from input import Input
 from grouping import Grouping
 
@@ -142,8 +144,13 @@ class Component(object):
     """
     A network component.
     """
+    FEEDER = 'feeder'
+    EXECUTOR = 'executor'
+    WORKER = 'worker'
+
     def __init__(self, component):
         self._component = component
+        self.__hook = None
     
     @property
     def address(self):
@@ -233,3 +240,65 @@ class Component(object):
         while iterator.hasNext():
           inputs.append(Input(iterator.next()))
         return inputs
+
+    def add_hook(self, event, handler):
+        """Adds a hook to the component.
+
+        This hook implementation adds an event bus based hook to the component.
+        Component events are delivered to the handler via the Vert.x event bus.
+
+        Keyword arguments:
+        @param event: The event for which to trigger the hook.
+        @param handler: The hook handler.
+        @return: self
+        """
+        if self.__hook is None:
+            self._component.addHook(net.kuujo.vertigo.hooks.EventBusHook())
+            self.__hook = net.kuujo.vertigo.hooks.EventBusHookListener(self._component.getAddress(), org.vertx.java.platform.impl.JythonVerticleFactory.vertx.eventBus())
+
+        if event == 'start':
+            self.__hook.startHandler(_ContextHandler(handler))
+        elif event == 'receive':
+            self.__hook.receiveHandler(_MessageIdHandler(handler))
+        elif event == 'ack':
+            self.__hook.ackHandler(_MessageIdHandler(handler))
+        elif event == 'fail':
+            self.__hook.failHandler(_MessageIdHandler(handler))
+        elif event == 'emit':
+            self.__hook.emitHandler(_MessageIdHandler(handler))
+        elif event == 'acked':
+            self.__hook.ackedHandler(_MessageIdHandler(handler))
+        elif event == 'failed':
+            self.__hook.failedHandler(_MessageIdHandler(handler))
+        elif event == 'timeout':
+            self.__hook.timeoutHandler(_MessageIdHandler(handler))
+        elif event == 'stop':
+            self.__hook.stopHandler(_ContextHandler(handler))
+        return self
+
+    def hook(self, event):
+        """Decorator for registering a component hook.
+
+        Keyword arguments:
+        @param event: The hook event.
+        """
+        def add_hook(handler):
+            self.add_hook(event, handler)
+            return handler
+        return add_hook
+
+class _ContextHandler(org.vertx.java.core.Handler):
+    """A hook context handler."""
+    def __init__(self, handler):
+        self._handler = handler
+
+    def handle(self, jcontext):
+        self._handler(InstanceContext(jcontext))
+
+class _MessageIdHandler(org.vertx.java.core.Handler):
+    """A message ID handler."""
+    def __init__(self, handler):
+        self._handler = handler
+
+    def handle(self, messageid):
+        self._handler(messageid.correlationId())
