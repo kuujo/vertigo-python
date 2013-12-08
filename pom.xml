@@ -202,7 +202,7 @@
             </property>
             <property>
               <name>vertx.test.timeout</name>
-              <value>30</value>
+              <value>60</value>
             </property>
           </systemProperties>
           <includes>
