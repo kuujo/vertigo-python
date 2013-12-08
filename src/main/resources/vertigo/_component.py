@@ -39,12 +39,6 @@ class Component(object):
         """The component configuration."""
         return map_from_java(self._component.getContext().getComponent().getConfig())
 
-    def declare_streams(self, streams):
-        """Declares component output streams."""
-        self._component.declareStreams(streams)
-
-    streams = property(lambda: None, declare_streams)
-
     def declare_schema(self, fields):
         """Declares a schema for the component."""
         self._component.declareSchema(net.kuujo.vertigo.message.schema.MessageSchema(fields))
