@@ -13,8 +13,8 @@
 # limitations under the License.
 import sys
 import net.kuujo.vertigo.util.Context
-import net.kuujo.vertigo.DefaultVertigoFactory
-import net.kuujo.vertigo.component.DefaultComponentFactory
+import net.kuujo.vertigo.impl.DefaultVertigoFactory
+import net.kuujo.vertigo.component.impl.DefaultComponentFactory
 import org.vertx.java.platform.impl.JythonVerticleFactory
 from context import NetworkContext, InstanceContext
 from network import Network
@@ -29,9 +29,9 @@ if _context is not None:
 def _setup_vertigo():
     vertx = org.vertx.java.platform.impl.JythonVerticleFactory.vertx
     container = org.vertx.java.platform.impl.JythonVerticleFactory.container
-    factory = net.kuujo.vertigo.DefaultVertigoFactory(vertx, container)
+    factory = net.kuujo.vertigo.impl.DefaultVertigoFactory(vertx, container)
     if current_context is not None:
-        component_factory = net.kuujo.vertigo.component.DefaultComponentFactory(vertx, container)
+        component_factory = net.kuujo.vertigo.component.impl.DefaultComponentFactory(vertx, container)
         return factory.createVertigo(component_factory.createComponent(current_context._context))
     else:
         return factory.createVertigo()

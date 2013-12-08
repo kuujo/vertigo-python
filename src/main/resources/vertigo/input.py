@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import net.kuujo.vertigo.input.Input;
-import net.kuujo.vertigo.input.DefaultListener
+import net.kuujo.vertigo.input.impl.DefaultListener
 import org.vertx.java.platform.impl.JythonVerticleFactory
 
 class Input(object):
@@ -54,7 +54,7 @@ class Input(object):
 class Listener(object):
     """An input listener."""
     def __init__(self, address):
-        self._listener = net.kuujo.vertigo.input.DefaultListener(address, org.vertx.java.platform.impl.JythonVerticleFactory.vertx)
+        self._listener = net.kuujo.vertigo.input.impl.DefaultListener(address, org.vertx.java.platform.impl.JythonVerticleFactory.vertx)
 
     def get_auto_ack(self):
         """Indicates whether auto acking is enabled."""
