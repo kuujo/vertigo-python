@@ -16,9 +16,7 @@ import net.kuujo.vertigo.input.DefaultListener
 import org.vertx.java.platform.impl.JythonVerticleFactory
 
 class Input(object):
-    """
-    A component input.
-    """
+    """A component input."""
     def __init__(self, javaobj):
         self._input = javaobj
 

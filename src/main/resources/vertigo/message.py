@@ -14,9 +14,7 @@
 from core.javautils import map_from_java
 
 class Message(object):
-    """
-    A Vertigo message.
-    """
+    """A Vertigo message."""
     def __init__(self, message):
         self._message = message
         self._body = map_from_java(message.body().toMap())

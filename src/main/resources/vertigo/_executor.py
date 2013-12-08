@@ -18,9 +18,7 @@ from message import Message
 from ._component import Component
 
 class Executor(Component):
-    """
-    A network executor.
-    """
+    """A network executor."""
     type = 'executor'
     RETRY_UNLIMITED = -1
 
@@ -74,9 +72,11 @@ class Executor(Component):
         return self._executor.feedQueueFull()
 
     def execute_handler(self, handler):
-        """Sets a feed handler on the feeder.
+        """Sets a feed handler on the executor.
 
+        Keyword arguments:
         @param handler: A handler to be called with the executor as its only argument.
+
         @return: The executor instance.
         """
         self._executor.executeHandler(_ExecuteHandler(handler, self))
@@ -85,8 +85,10 @@ class Executor(Component):
     def drain_handler(self, handler):
         """Sets a drain handler on the executor.
 
+        Keyword arguments:
         @param handler: A handler to be called when the executor is prepared to
         accept new message.
+
         @return: The executor instance.
         """
         self._executor.drainHandler(_VoidHandler(handler))
@@ -98,6 +100,7 @@ class Executor(Component):
     def execute(self, data, stream=None, handler=None):
         """Performs an execution.
 
+        Keyword arguments:
         @param data: The dictionary data to emit.
         @param stream: An optional stream to which to emit the data. If no stream
         is provided then the default stream will be used.
@@ -106,7 +109,7 @@ class Executor(Component):
         multiple results are received for the execution then the handler will be
         called multiple times.
 
-        @return: The feeder instance.
+        @return: The executor instance.
         """
         if stream is not None:
             if handler is not None:

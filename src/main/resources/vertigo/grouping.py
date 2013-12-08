@@ -17,34 +17,28 @@ import net.kuujo.vertigo.input.grouping.RoundGrouping
 import net.kuujo.vertigo.input.grouping.FieldsGrouping
 
 class Grouping(object):
-  """
-  A base grouping.
-  """
+    """A base grouping."""
 
 class AllGrouping(Grouping):
-  """
-  An all grouping.
-  """
-  def __init__(self):
-    self._grouping = net.kuujo.vertigo.input.grouping.AllGrouping()
+    """An all grouping."""
+    def __init__(self):
+        self._grouping = net.kuujo.vertigo.input.grouping.AllGrouping()
 
 class RandomGrouping(Grouping):
-  """
-  A random grouping.
-  """
-  def __init__(self):
-    self._grouping = net.kuujo.vertigo.input.grouping.RandomGrouping()
+    """A random grouping."""
+    def __init__(self):
+        self._grouping = net.kuujo.vertigo.input.grouping.RandomGrouping()
 
 class RoundGrouping(Grouping):
-  """
-  A round-robin grouping.
-  """
-  def __init__(self):
-    self._grouping = net.kuujo.vertigo.input.grouping.RoundGrouping()
+    """A round-robin grouping."""
+    def __init__(self):
+        self._grouping = net.kuujo.vertigo.input.grouping.RoundGrouping()
 
 class FieldsGrouping(Grouping):
-  """
-  A fields-based grouping.
-  """
-  def __init__(self, *fields):
-    self._grouping = net.kuujo.vertigo.input.grouping.FieldsGrouping(*fields)
+    """A fields-based grouping.
+
+    Keyword arguments:
+    @param fields: A list of fields on which to hash.
+    """
+    def __init__(self, *fields):
+        self._grouping = net.kuujo.vertigo.input.grouping.FieldsGrouping(*fields)

@@ -67,7 +67,9 @@ def create_network(address):
     """
     Creates a new network.
 
+    Keyword arguments:
     @param address: The network address.
+
     @return: A new network instance.
     """
     return Network(_vertigo.createNetwork(address))
@@ -76,9 +78,11 @@ def deploy_local_network(network, handler=None):
     """
     Deploys a local network.
 
+    Keyword arguments:
     @param network: The network to deploy.
     @param handler: An optional asynchronous handler to be called once the deployment
     is complete.
+
     @return: The current vertigo instance.
     """
     if handler is not None:
@@ -91,9 +95,11 @@ def shutdown_local_network(context, handler=None):
     """
     Shuts down a local network.
 
+    Keyword arguments:
     @param context: The network context for the network to shutdown.
     @param handler: An optional asynchronous handler to be called once the shutdown
     is complete.
+
     @return: The current vertigo instance.
     """
     if handler is not None:
@@ -106,10 +112,12 @@ def deploy_remote_network(address, network, handler=None):
     """
     Deploys a remote network.
 
+    Keyword arguments:
     @param address: The event bus address to which to deploy modules and verticles.
     @param network: The network to deploy.
     @param handler: An optional asynchronous handler to be called once the deployment
     is complete.
+
     @return: The current vertigo instance.
     """
     if handler is not None:
@@ -122,10 +130,12 @@ def shutdown_remote_network(address, context, handler=None):
     """
     Shuts down a remote network.
 
+    Keyword arguments:
     @param address: The event bus address to which to deploy modules and verticles.
     @param context: The network context for the network to shutdown.
     @param handler: An optional asynchronous handler to be called once the shutdown
     is complete.
+
     @return: The current vertigo instance.
     """
     if handler is not None:

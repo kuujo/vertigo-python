@@ -75,8 +75,10 @@ class Feeder(Component):
     def ack_handler(self, handler):
         """Sets a default ack handler on the feeder.
 
+        Keyword arguments:
         @param handler: A default ack handler to be used when no other ack handler
         is present.
+
         @return: The added handler
         """
         self._ack_handler = handler
@@ -85,7 +87,9 @@ class Feeder(Component):
     def feed_handler(self, handler):
         """Sets a feed handler on the feeder.
 
+        Keyword arguments:
         @param handler: A handler to be called with the feeder as its only argument.
+
         @return: The feeder instance.
         """
         self._feeder.feedHandler(_FeedHandler(handler, self))
@@ -94,8 +98,10 @@ class Feeder(Component):
     def drain_handler(self, handler):
         """Sets a drain handler on the feeder.
 
+        Keyword arguments:
         @param handler: A handler to be called when the feeder is prepared to
         accept new message.
+
         @return: self
         """
         self._feeder.drainHandler(_VoidHandler(handler))
@@ -107,6 +113,7 @@ class Feeder(Component):
     def emit(self, data, stream=None, handler=None):
         """Emits a message from the feeder.
 
+        Keyword arguments:
         @param data: A dictionary of data to emit.
         @param stream: An optional stream to which to emit the data. If no stream
         is provided then the data will be emitted to the default stream.

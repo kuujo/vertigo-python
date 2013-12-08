@@ -80,12 +80,12 @@ class Network(object):
         self._network.addComponent(component._component)
         return component
 
-    def add_feeder(self, address, main=None, config=None, instances=1):
+    def add_feeder(self, address, main, config=None, instances=1):
         """Adds a feeder component to the network.
     
         Keyword arguments:
         @param address: The component event bus address.
-        @param main: The feeder main.
+        @param main: The feeder main or module name.
         @param config: The feeder component configuration.
         @param instances: The number of feeder instances.
     
@@ -100,12 +100,12 @@ class Network(object):
         else:
             return Component(self._network.addFeeder(address).setInstances(instances))
 
-    def add_executor(self, address, main=None, config=None, instances=1):
+    def add_executor(self, address, main, config=None, instances=1):
         """Adds an executor component to the network.
     
         Keyword arguments:
         @param address: The component event bus address.
-        @param main: The executor main.
+        @param main: The executor main or module name.
         @param config: The executor component configuration.
         @param instances: The number of executor instances.
     
@@ -120,12 +120,12 @@ class Network(object):
         else:
             return Component(self._network.addExecutor(address).setInstances(instances))
 
-    def add_worker(self, address, main=None, config=None, instances=1):
+    def add_worker(self, address, main, config=None, instances=1):
         """Adds a worker component to the network.
     
         Keyword arguments:
         @param address: The component event bus address.
-        @param main: The worker main.
+        @param main: The worker main or module name.
         @param config: The worker component configuration.
         @param instances: The number of worker instances.
     
