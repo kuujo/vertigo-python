@@ -58,15 +58,8 @@ if _vertigo.isComponent():
     elif _component_type == 'worker':
         from . import _worker
         worker = _worker.Worker(_vertigo.component()).start()
-    elif _component_type == 'filter':
-        from . import _filter
-        filter = _filter.Filter(_vertigo.component()).start()
-    elif _component_type == 'splitter':
-        from . import _splitter
-        splitter = _splitter.Feeder(_vertigo.component()).start()
-    elif _component_type == 'aggregator':
-        from . import _aggregator
-        aggregator = _aggregator.Feeder(_vertigo.component()).start()
+    else:
+        raise ImportError("Unknown Vertigo component type %s" % (_component_type,))
 
 logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
 
