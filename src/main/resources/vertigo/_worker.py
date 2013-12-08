@@ -54,14 +54,14 @@ class Worker(Component):
         """
         if parent is not None:
             if stream is not None:
-                return self._worker.emit(stream, self._convert_data(body), parent._message)
+                return self._worker.emit(stream, self._convert_data(body), parent._message).correlationId()
             else:
-                return self._worker.emit(self._convert_data(body), parent._message)
+                return self._worker.emit(self._convert_data(body), parent._message).correlationId()
         else:
             if stream is not None:
-                return self._worker.emit(stream, self._convert_data(body))
+                return self._worker.emit(stream, self._convert_data(body)).correlationId()
             else:
-                return self._worker.emit(self._convert_data(body))
+                return self._worker.emit(self._convert_data(body)).correlationId()
     
     def ack(self, message):
         """Acknowledges a message.
