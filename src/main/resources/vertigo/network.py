@@ -148,6 +148,16 @@ class Component(object):
     EXECUTOR = 'executor'
     WORKER = 'worker'
 
+    HOOK_START = 'start'
+    HOOK_RECEIVE = 'receive'
+    HOOK_ACK = 'ack'
+    HOOK_FAIL = 'fail'
+    HOOK_EMIT = 'emit'
+    HOOK_ACKED = 'acked'
+    HOOK_FAILED = 'failed'
+    HOOK_TIMEOUT = 'timeout'
+    HOOK_STOP = 'stop'
+
     def __init__(self, component):
         self._component = component
         self.__hook = None
@@ -256,23 +266,23 @@ class Component(object):
             self._component.addHook(net.kuujo.vertigo.hooks.EventBusHook())
             self.__hook = net.kuujo.vertigo.hooks.EventBusHookListener(self._component.getAddress(), org.vertx.java.platform.impl.JythonVerticleFactory.vertx.eventBus())
 
-        if event == 'start':
+        if event == self.HOOK_START:
             self.__hook.startHandler(_ContextHandler(handler))
-        elif event == 'receive':
+        elif event == self.HOOK_RECEIVE:
             self.__hook.receiveHandler(_MessageIdHandler(handler))
-        elif event == 'ack':
+        elif event == self.HOOK_ACK:
             self.__hook.ackHandler(_MessageIdHandler(handler))
-        elif event == 'fail':
+        elif event == self.HOOK_FAIL:
             self.__hook.failHandler(_MessageIdHandler(handler))
-        elif event == 'emit':
+        elif event == self.HOOK_EMIT:
             self.__hook.emitHandler(_MessageIdHandler(handler))
-        elif event == 'acked':
+        elif event == self.HOOK_ACKED:
             self.__hook.ackedHandler(_MessageIdHandler(handler))
-        elif event == 'failed':
+        elif event == self.HOOK_FAILED:
             self.__hook.failedHandler(_MessageIdHandler(handler))
-        elif event == 'timeout':
+        elif event == self.HOOK_TIMEOUT:
             self.__hook.timeoutHandler(_MessageIdHandler(handler))
-        elif event == 'stop':
+        elif event == self.HOOK_STOP:
             self.__hook.stopHandler(_ContextHandler(handler))
         return self
 
