@@ -40,11 +40,11 @@ class Worker(Component):
     def _convert_data(self, data):
         return org.vertx.java.core.json.JsonObject(map_to_java(data))
 
-    def emit(self, data, stream=None, parent=None):
+    def emit(self, body, stream=None, parent=None):
         """Emits data to all output streams.
     
         Keyword arguments:
-        @param data: The data to emit.
+        @param body: The data to emit.
         @param stream: The stream to which to emit the message. If no stream is
         provided then the default stream will be used.
         @param parent: An optional message parent. If a parent message is provided
@@ -54,14 +54,14 @@ class Worker(Component):
         """
         if parent is not None:
             if stream is not None:
-                return self._worker.emit(stream, self._convert_data(data), parent._message)
+                return self._worker.emit(stream, self._convert_data(body), parent._message)
             else:
-                return self._worker.emit(self._convert_data(data), parent._message)
+                return self._worker.emit(self._convert_data(body), parent._message)
         else:
             if stream is not None:
-                return self._worker.emit(stream, self._convert_data(data))
+                return self._worker.emit(stream, self._convert_data(body))
             else:
-                return self._worker.emit(self._convert_data(data))
+                return self._worker.emit(self._convert_data(body))
     
     def ack(self, message):
         """Acknowledges a message.

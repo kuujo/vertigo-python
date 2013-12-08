@@ -11,17 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from test import Assert, Test
-from vertigo import feeder
-from vertigo.error import FailureError
+from test import Assert
+from vertigo import worker
 
-@feeder.start_handler
-def start_handler(error, feeder):
-    if error is None:
-        feeder.emit({'body': 'Hello world!'})
-
-@feeder.ack_handler
-def ack_handler(error, id):
-    Assert.not_null(error)
-    Assert.true(isinstance(error, FailureError))
-    Test.complete()
+@worker.message_handler
+def message_handler(message):
+    Assert.not_null(message)
+    Assert.not_null(message.id)
+    Assert.not_null(message.body)
+    worker.emit(message.body, parent=message)

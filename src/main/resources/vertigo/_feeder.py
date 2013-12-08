@@ -110,11 +110,11 @@ class Feeder(Component):
     def _convert_data(self, data):
         return org.vertx.java.core.json.JsonObject(map_to_java(data))
 
-    def emit(self, data, stream=None, handler=None):
+    def emit(self, body, stream=None, handler=None):
         """Emits a message from the feeder.
 
         Keyword arguments:
-        @param data: A dictionary of data to emit.
+        @param body: A dictionary of data to emit.
         @param stream: An optional stream to which to emit the data. If no stream
         is provided then the data will be emitted to the default stream.
         @param handler: An optional asynchronous handler to be called once the
@@ -129,14 +129,14 @@ class Feeder(Component):
             handler = self._ack_handler
         if stream is not None:
             if handler is not None:
-                return self._feeder.emit(stream, self._convert_data(data), _AckHandler(handler)).correlationId()
+                return self._feeder.emit(stream, self._convert_data(body), _AckHandler(handler)).correlationId()
             else:
-                return self._feeder.emit(stream, self._convert_data(data)).correlationId()
+                return self._feeder.emit(stream, self._convert_data(body)).correlationId()
         else:
             if handler is not None:
-                return self._feeder.emit(self._convert_data(data), _AckHandler(handler)).correlationId()
+                return self._feeder.emit(self._convert_data(body), _AckHandler(handler)).correlationId()
             else:
-                return self._feeder.emit(self._convert_data(data)).correlationId()
+                return self._feeder.emit(self._convert_data(body)).correlationId()
 
 class _FeedHandler(org.vertx.java.core.Handler):
     """A feed handler."""

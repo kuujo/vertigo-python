@@ -12,16 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from test import Assert, Test
-from vertigo import feeder
-from vertigo.error import FailureError
+from vertigo import executor
+from vertigo.error import TimeoutError
 
-@feeder.start_handler
-def start_handler(error, feeder):
+@executor.start_handler
+def start_handler(error, executor):
     if error is None:
-        feeder.emit({'body': 'Hello world!'})
-
-@feeder.ack_handler
-def ack_handler(error, id):
-    Assert.not_null(error)
-    Assert.true(isinstance(error, FailureError))
-    Test.complete()
+        def result_handler(error, result):
+            Assert.not_null(error)
+            Assert.true(isinstance(error, TimeoutError))
+            Test.complete()
+        executor.execute({'body': 'Hello world!'}, handler=result_handler)

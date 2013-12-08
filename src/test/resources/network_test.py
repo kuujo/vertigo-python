@@ -62,4 +62,99 @@ class NetworkTestCase(TestCase):
     self.assert_equals(2, len(component2.inputs))
     self.complete()
 
+  def _create_feeder_network(self, feeder, worker):
+    network = vertigo.create_network('test')
+    network.acking = True
+    network.add_feeder('test_feeder', feeder)
+    network.add_worker('test_worker', worker).add_input('test_feeder')
+    return network
+
+  def test_feeder_ack(self):
+    """
+    Tests the basic feeder acking support.
+    """
+    network = self._create_feeder_network('test_acking_feeder.py', 'test_acking_worker.py')
+    def deploy_handler(error, context):
+      self.assert_null(error)
+      self.assert_not_null(context)
+    vertigo.deploy_local_network(network, deploy_handler)
+
+  def test_feeder_fail(self):
+    """
+    Tests the basic feeder fail support.
+    """
+    network = self._create_feeder_network('test_failing_feeder.py', 'test_failing_worker.py')
+    def deploy_handler(error, context):
+      self.assert_null(error)
+      self.assert_not_null(context)
+    vertigo.deploy_local_network(network, deploy_handler)
+
+  def test_feeder_timeout(self):
+    """
+    Tests the basic feeder timeout support.
+    """
+    network = self._create_feeder_network('test_timeout_feeder.py', 'test_timeout_worker.py')
+    network.ack_timeout = 500
+    def deploy_handler(error, context):
+      self.assert_null(error)
+      self.assert_not_null(context)
+    vertigo.deploy_local_network(network, deploy_handler)
+
+  def _create_executor_network(self, executor, worker):
+    network = vertigo.create_network('test')
+    network.acking = True
+    network.add_executor('test_executor', executor).add_input('test_worker')
+    network.add_worker('test_worker', worker).add_input('test_executor')
+    return network
+
+  def test_executor_ack(self):
+    """
+    Tests the basic executor acking support.
+    """
+    network = self._create_executor_network('test_acking_executor.py', 'test_acking_worker.py')
+    def deploy_handler(error, context):
+      self.assert_null(error)
+      self.assert_not_null(context)
+    vertigo.deploy_local_network(network, deploy_handler)
+
+  def test_executor_fail(self):
+    """
+    Tests the basic executor fail support.
+    """
+    network = self._create_executor_network('test_failing_executor.py', 'test_failing_worker.py')
+    def deploy_handler(error, context):
+      self.assert_null(error)
+      self.assert_not_null(context)
+    vertigo.deploy_local_network(network, deploy_handler)
+
+  def test_executor_timeout(self):
+    """
+    Tests the basic executor timeout support.
+    """
+    network = self._create_executor_network('test_timeout_executor.py', 'test_timeout_worker.py')
+    network.ack_timeout = 500
+    def deploy_handler(error, context):
+      self.assert_null(error)
+      self.assert_not_null(context)
+    vertigo.deploy_local_network(network, deploy_handler)
+
+  def test_event_bus_hook(self):
+    """
+    Tests running an event bus hook.
+    """
+    network = vertigo.create_network('test')
+    network.acking = True
+    network.add_feeder('test_feeder', 'test_acking_feeder.py')
+    worker = network.add_worker('test_worker', 'test_acking_worker.py')
+    worker.add_input('test_feeder')
+
+    @worker.hook('start')
+    def handle_start(context):
+      self.assert_true(context.id[:11] == 'test_worker')
+
+    def deploy_handler(error, context):
+      self.assert_null(error)
+      self.assert_not_null(context)
+    vertigo.deploy_local_network(network, deploy_handler)
+
 run_test(NetworkTestCase())

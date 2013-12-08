@@ -77,7 +77,7 @@ class Executor(Component):
         Keyword arguments:
         @param handler: A handler to be called with the executor as its only argument.
 
-        @return: The executor instance.
+        @return: self
         """
         self._executor.executeHandler(_ExecuteHandler(handler, self))
         return self
@@ -89,7 +89,7 @@ class Executor(Component):
         @param handler: A handler to be called when the executor is prepared to
         accept new message.
 
-        @return: The executor instance.
+        @return: self
         """
         self._executor.drainHandler(_VoidHandler(handler))
         return self
@@ -97,11 +97,11 @@ class Executor(Component):
     def _convert_data(self, data):
         return org.vertx.java.core.json.JsonObject(map_to_java(data))
 
-    def execute(self, data, stream=None, handler=None):
+    def execute(self, body, stream=None, handler=None):
         """Performs an execution.
 
         Keyword arguments:
-        @param data: The dictionary data to emit.
+        @param body: The dictionary data to emit.
         @param stream: An optional stream to which to emit the data. If no stream
         is provided then the default stream will be used.
         @param handler: An asynchronous result handler. The handler will be called
@@ -109,18 +109,18 @@ class Executor(Component):
         multiple results are received for the execution then the handler will be
         called multiple times.
 
-        @return: The executor instance.
+        @return: self
         """
         if stream is not None:
             if handler is not None:
-                self._executor.execute(stream, self._convert_data(data), _ResultHandler(handler)).correlationId()
+                return self._executor.execute(stream, self._convert_data(body), _ResultHandler(handler)).correlationId()
             else:
-                self._executor.execute(stream, self._convert_data(data), _ResultHandler(None)).correlationId()
+                return self._executor.execute(stream, self._convert_data(body), _ResultHandler(None)).correlationId()
         else:
             if handler is not None:
-                self._executor.execute(self._convert_data(data), _ResultHandler(handler)).correlationId()
+                return self._executor.execute(self._convert_data(body), _ResultHandler(handler)).correlationId()
             else:
-                self._executor.execute(self._convert_data(data), _ResultHandler(None))
+                return self._executor.execute(self._convert_data(body), _ResultHandler(None)).correlationId()
 
 class _ExecuteHandler(org.vertx.java.core.Handler):
     """An execute handler."""
