@@ -117,16 +117,6 @@ class NetworkTestCase(TestCase):
       self.assert_not_null(context)
     vertigo.deploy_local_network(network, deploy_handler)
 
-  def test_executor_fail(self):
-    """
-    Tests the basic executor fail support.
-    """
-    network = self._create_executor_network('test_failing_executor.py', 'test_failing_worker.py')
-    def deploy_handler(error, context):
-      self.assert_null(error)
-      self.assert_not_null(context)
-    vertigo.deploy_local_network(network, deploy_handler)
-
   def test_executor_timeout(self):
     """
     Tests the basic executor timeout support.
