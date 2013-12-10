@@ -69,10 +69,10 @@ class Executor(Component):
     
     def execute_queue_full(self):
         """Indicates whether the executor queue is full."""
-        return self._executor.feedQueueFull()
+        return self._executor.executeQueueFull()
 
     def execute_handler(self, handler):
-        """Sets a feed handler on the executor.
+        """Sets an execute handler on the executor.
 
         Keyword arguments:
         @param handler: A handler to be called with the executor as its only argument.

@@ -13,7 +13,7 @@
 # limitations under the License.
 from context import NetworkContext
 import net.kuujo.vertigo.cluster.LocalCluster
-import net.kuujo.vertigo.cluster.ViaCluster
+import net.kuujo.vertigo.cluster.RemoteCluster
 import org.vertx.java.core.AsyncResultHandler
 import org.vertx.java.platform.impl.JythonVerticleFactory
 from core.javautils import map_from_java, map_to_java
@@ -58,9 +58,9 @@ class LocalCluster(_AbstractCluster):
     """A local cluster."""
     _handlercls = net.kuujo.vertigo.cluster.LocalCluster
 
-class ViaCluster(_AbstractCluster):
-    """A via cluster."""
-    _handlercls = net.kuujo.vertigo.cluster.ViaCluster
+class RemoteCluster(_AbstractCluster):
+    """A remote cluster."""
+    _handlercls = net.kuujo.vertigo.cluster.RemoteCluster
 
 class DeployHandler(org.vertx.java.core.AsyncResultHandler):
     """A deployment handler."""
