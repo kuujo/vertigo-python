@@ -145,7 +145,7 @@ class _FeedHandler(org.vertx.java.core.Handler):
         self._feeder = feeder
 
     def handle(self, feeder):
-        self._handler(self.feeder)
+        self._handler(self._feeder)
 
 class _AckHandler(org.vertx.java.core.AsyncResultHandler):
     """An ack handler."""
