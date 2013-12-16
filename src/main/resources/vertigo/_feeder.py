@@ -59,12 +59,12 @@ class Feeder(Component):
 
     def set_feed_interval(self, interval):
         """Indicates the interval at which to poll for new messages."""
-        self._executor.setFeedInterval(interval)
+        self._feeder.setFeedInterval(interval)
         return self
 
     def get_feed_interval(self):
         """Indicates the interval at which to poll for new messages."""
-        return self._executor.getFeedInterval()
+        return self._feeder.getFeedInterval()
 
     feed_interval = property(get_feed_interval, set_feed_interval)
     
