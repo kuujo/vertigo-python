@@ -127,7 +127,24 @@ class NetworkTestCase(TestCase):
             self.assert_null(error)
             self.assert_not_null(context)
         vertigo.deploy_local_network(network, deploy_handler)
-    
+
+    def test_nested_network(self):
+        """
+        Tests a simple nested network.
+        """
+        network1 = vertigo.create_network('test1')
+        network1.add_feeder('test1.feeder1', 'test_periodic_feeder.py')
+        def deploy_handler(error, context):
+            self.assert_null(error)
+            self.assert_not_null(context)
+            network2 = vertigo.create_network('test2')
+            network2.add_worker('test2.worker1', 'test_completing_worker.py').add_input('test1.feeder1')
+            def deploy_handler2(error, context):
+                self.assert_null(error)
+                self.assert_not_null(context)
+            vertigo.deploy_local_network(network2, deploy_handler2)
+        vertigo.deploy_local_network(network1, deploy_handler)
+
     def test_event_bus_hook(self):
         """
         Tests running an event bus hook.
