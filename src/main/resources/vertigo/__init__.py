@@ -15,7 +15,7 @@ import sys
 import net.kuujo.vertigo.util.Factory
 import net.kuujo.vertigo.util.Component
 import org.vertx.java.platform.impl.JythonVerticleFactory
-from context import NetworkContext, InstanceContext
+from context import NetworkContext
 from network import Network
 
 this = sys.modules[__name__]
@@ -35,9 +35,7 @@ def is_component():
     """
     return _vertigo.isComponent()
 
-current_context = None
 if is_component():
-    current_context = InstanceContext(_vertigo.context())
     _component_type = net.kuujo.vertigo.util.Component.serializeType(_vertigo.context().getComponent().getType())
     if _component_type == 'feeder':
         from . import _feeder

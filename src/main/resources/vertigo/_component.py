@@ -37,7 +37,7 @@ class Component(object):
     @property
     def config(self):
         """The component configuration."""
-        return map_from_java(self._component.getContext().getComponent().getConfig())
+        return map_from_java(self._component.getContext().getComponent().getConfig().toMap())
 
     def declare_schema(self, fields):
         """Declares a schema for the component."""

@@ -15,6 +15,11 @@ from test import Assert, Test
 from vertigo import feeder
 from vertigo.error import FailureError
 
+Assert.not_null(feeder.context)
+Assert.true(isinstance(feeder.context.id, basestring))
+Assert.true(isinstance(feeder.context.component.address, basestring))
+Assert.true(isinstance(feeder.context.component.network.address, basestring))
+
 @feeder.start_handler
 def start_handler(error, feeder):
     if error is None:

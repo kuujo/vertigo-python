@@ -14,6 +14,11 @@
 from test import Assert, Test
 from vertigo import executor
 
+Assert.not_null(executor.context)
+Assert.true(isinstance(executor.context.id, basestring))
+Assert.true(isinstance(executor.context.component.address, basestring))
+Assert.true(isinstance(executor.context.component.network.address, basestring))
+
 @executor.start_handler
 def start_handler(error, executor):
     if error is None:

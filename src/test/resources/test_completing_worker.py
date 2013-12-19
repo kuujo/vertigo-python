@@ -14,6 +14,11 @@
 from test import Assert, Test
 from vertigo import worker
 
+Assert.not_null(worker.context)
+Assert.true(isinstance(worker.context.id, basestring))
+Assert.true(isinstance(worker.context.component.address, basestring))
+Assert.true(isinstance(worker.context.component.network.address, basestring))
+
 @worker.message_handler
 def message_handler(message):
   """Completes the test when a message is received."""

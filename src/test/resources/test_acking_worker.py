@@ -15,6 +15,11 @@ from test import Assert
 from vertigo import worker
 from vertigo.message import Message
 
+Assert.not_null(worker.context)
+Assert.true(isinstance(worker.context.id, basestring))
+Assert.true(isinstance(worker.context.component.address, basestring))
+Assert.true(isinstance(worker.context.component.network.address, basestring))
+
 @worker.message_handler
 def message_handler(message):
     Assert.not_null(message)
