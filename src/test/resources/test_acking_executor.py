@@ -17,6 +17,19 @@ from vertigo import executor
 @executor.start_handler
 def start_handler(error, executor):
     if error is None:
+        executor.result_timeout = 15000
+        Assert.equals(15000, executor.result_timeout)
+        executor.execute_queue_max_size = 500
+        Assert.equals(500, executor.execute_queue_max_size)
+        executor.auto_retry = True
+        Assert.equals(True, executor.auto_retry)
+        executor.auto_retry = False
+        executor.auto_retry_attempts = 3
+        Assert.equals(3, executor.auto_retry_attempts)
+        executor.execute_interval = 500
+        Assert.equals(500, executor.execute_interval)
+        Assert.false(executor.execute_queue_full())
+
         def result_handler(error, result):
             Assert.null(error)
             Assert.not_null(result)

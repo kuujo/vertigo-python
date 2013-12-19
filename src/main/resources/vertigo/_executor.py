@@ -26,6 +26,16 @@ class Executor(Component):
         super(Executor, self).__init__(executor)
         self._executor = executor
 
+    def set_result_timeout(self, timeout):
+        """The execution result timeout."""
+        self._executor.setResultTimeout(timeout)
+
+    def get_result_timeout(self):
+        """The execution result timeout."""
+        return self._executor.getResultTimeout()
+
+    result_timeout = property(get_result_timeout, set_result_timeout)
+
     def set_execute_queue_max_size(self, queue_size):
         """The maximum number of messages processing at any given time."""
         self._executor.setExecuteQueueMaxSize(queue_size)

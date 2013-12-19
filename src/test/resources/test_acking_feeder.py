@@ -17,6 +17,16 @@ from vertigo import feeder
 @feeder.start_handler
 def start_handler(error, feeder):
     if error is None:
+        feeder.feed_queue_max_size = 500
+        Assert.equals(500, feeder.feed_queue_max_size)
+        feeder.auto_retry = True
+        Assert.equals(True, feeder.auto_retry)
+        feeder.auto_retry = False
+        feeder.auto_retry_attempts = 3
+        Assert.equals(3, feeder.auto_retry_attempts)
+        feeder.feed_interval = 500
+        Assert.equals(500, feeder.feed_interval)
+        Assert.false(feeder.feed_queue_full())
         feeder.emit({'body': 'Hello world!'})
 
 @feeder.ack_handler
