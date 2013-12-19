@@ -12,32 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-import net.kuujo.vertigo.util.Context
-import net.kuujo.vertigo.impl.DefaultVertigoFactory
-import net.kuujo.vertigo.component.impl.DefaultComponentFactory
+import net.kuujo.vertigo.util.Factory
+import net.kuujo.vertigo.util.Component
 import org.vertx.java.platform.impl.JythonVerticleFactory
 from context import NetworkContext, InstanceContext
 from network import Network
 
 this = sys.modules[__name__]
 
-current_context = None
-_context = net.kuujo.vertigo.util.Context.parseContext(org.vertx.java.platform.impl.JythonVerticleFactory.container.config())
-if _context is not None:
-    current_context = InstanceContext(_context)
+_vertigo = net.kuujo.vertigo.util.Factory.createVertigo(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
 
-def _setup_vertigo():
-    vertx = org.vertx.java.platform.impl.JythonVerticleFactory.vertx
-    container = org.vertx.java.platform.impl.JythonVerticleFactory.container
-    factory = net.kuujo.vertigo.impl.DefaultVertigoFactory(vertx, container)
-    if current_context is not None:
-        component_factory = net.kuujo.vertigo.component.impl.DefaultComponentFactory(vertx, container)
-        return factory.createVertigo(component_factory.createComponent(current_context._context))
-    else:
-        return factory.createVertigo()
+logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
 
-_vertigo = _setup_vertigo()
-
+# Note: This method must come before the component module is imported
+# due to a recursive dependency.
 def is_component():
     """
     Indicates whether the current verticle is a Vertigo component instance.
@@ -47,7 +35,9 @@ def is_component():
     """
     return _vertigo.isComponent()
 
-if _vertigo.isComponent():
+current_context = None
+if is_component():
+    current_context = InstanceContext(_vertigo.context())
     _component_type = net.kuujo.vertigo.util.Component.serializeType(_vertigo.context().getComponent().getType())
     if _component_type == 'feeder':
         from . import _feeder
@@ -60,8 +50,6 @@ if _vertigo.isComponent():
         worker = _worker.Worker(_vertigo.component()).start()
     else:
         raise ImportError("Unknown Vertigo component type %s" % (_component_type,))
-
-logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
 
 def create_network(address):
     """
