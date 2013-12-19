@@ -13,11 +13,25 @@
 # limitations under the License.
 from test import Assert
 from vertigo import worker
+from vertigo.message import Message
 
 @worker.message_handler
 def message_handler(message):
     Assert.not_null(message)
-    Assert.not_null(message.id)
-    Assert.not_null(message.body)
+    Assert.true(isinstance(message, Message))
+    Assert.true(isinstance(message.id, basestring))
+    Assert.true(isinstance(message.source, basestring))
+    Assert.true(isinstance(message.body, dict))
+    Assert.true(isinstance(message.has_parent(), bool))
+    if message.has_parent():
+        Assert.true(isinstance(message.parent, basestring))
+    Assert.true(isinstance(message.has_root(), bool))
+    Assert.true(isinstance(message.is_root(), bool))
+    if message.has_root():
+        Assert.true(isinstance(message.root, basestring))
+    else:
+        Assert.true(message.is_root())
+    Assert.true(isinstance(message.stream, basestring))
+
     worker.emit(message.body, parent=message)
     worker.fail(message)

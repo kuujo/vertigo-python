@@ -35,7 +35,7 @@ class Feeder(Component):
         """The maximum number of messages processing at any given time."""
         return self._feeder.getFeedQueueMaxSize()
     
-    max_queue_size = property(get_feed_queue_max_size, set_feed_queue_max_size)
+    feed_queue_max_size = property(get_feed_queue_max_size, set_feed_queue_max_size)
     
     def set_auto_retry(self, retry):
         """Indicates whether to automatically retry sending failed messages."""

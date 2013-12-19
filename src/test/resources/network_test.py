@@ -11,14 +11,45 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from test import TestCase, run_test
+from test import TestCase, Assert, run_test
 import vertigo
+from vertigo.context import NetworkContext, ComponentContext, InstanceContext
 from vertigo.grouping import RoundGrouping
 
 class NetworkTestCase(TestCase):
     """
     A network test case.
     """
+    def check_context(self, context):
+        """
+        Checks a network context.
+        """
+        Assert.false(context.address == None)
+        Assert.true(isinstance(context.auditors, list))
+        Assert.true(len(context.auditors) > 0)
+        Assert.true(context.acking)
+        Assert.true(context.ack_timeout > 0)
+        Assert.true(isinstance(context.components, dict))
+        Assert.true(len(context.components) > 0)
+
+        for address, component in context.components.iteritems():
+            Assert.true(isinstance(component, ComponentContext))
+            Assert.equals(context.address, component.network.address)
+            Assert.false(component.address == None)
+            Assert.true(component.type in ('feeder', 'worker', 'executor'))
+            Assert.true(component.is_module or component.is_verticle)
+            if component.is_module:
+                Assert.false(component.module == None)
+            elif component.is_verticle:
+                Assert.false(component.main == None)
+            Assert.true(isinstance(component.config, dict))
+            Assert.true(isinstance(component.instances, list))
+            Assert.true(isinstance(component.network, NetworkContext))
+            for instance in component.instances:
+                Assert.true(isinstance(instance, InstanceContext))
+                Assert.true(isinstance(instance.component, ComponentContext))
+                Assert.equals(component.address, instance.component.address)
+
     def test_create_network(self):
         """
         Tests creating a network.
@@ -33,8 +64,6 @@ class NetworkTestCase(TestCase):
         self.assert_true(network.acking)
         network.ack_expire = 60000
         self.assert_equals(60000, network.ack_expire)
-        network.ack_delay = 1000
-        self.assert_equals(1000, network.ack_delay)
         network.num_auditors = 2
         self.assert_equals(2, network.num_auditors)
         component1 = network.add_feeder('test_feeder_verticle', main='test_feeder_verticle.py')
@@ -77,6 +106,7 @@ class NetworkTestCase(TestCase):
         def deploy_handler(error, context):
             self.assert_null(error)
             self.assert_not_null(context)
+            self.check_context(context)
         vertigo.deploy_local_network(network, deploy_handler)
     
     def test_feeder_fail(self):
@@ -87,6 +117,7 @@ class NetworkTestCase(TestCase):
         def deploy_handler(error, context):
             self.assert_null(error)
             self.assert_not_null(context)
+            self.check_context(context)
         vertigo.deploy_local_network(network, deploy_handler)
     
     def test_feeder_timeout(self):
@@ -98,6 +129,7 @@ class NetworkTestCase(TestCase):
         def deploy_handler(error, context):
             self.assert_null(error)
             self.assert_not_null(context)
+            self.check_context(context)
         vertigo.deploy_local_network(network, deploy_handler)
     
     def _create_executor_network(self, executor, worker):
@@ -115,6 +147,7 @@ class NetworkTestCase(TestCase):
         def deploy_handler(error, context):
             self.assert_null(error)
             self.assert_not_null(context)
+            self.check_context(context)
         vertigo.deploy_local_network(network, deploy_handler)
     
     def test_executor_timeout(self):
@@ -126,6 +159,7 @@ class NetworkTestCase(TestCase):
         def deploy_handler(error, context):
             self.assert_null(error)
             self.assert_not_null(context)
+            self.check_context(context)
         vertigo.deploy_local_network(network, deploy_handler)
 
     def test_nested_network(self):
@@ -137,11 +171,13 @@ class NetworkTestCase(TestCase):
         def deploy_handler(error, context):
             self.assert_null(error)
             self.assert_not_null(context)
+            self.check_context(context)
             network2 = vertigo.create_network('test2')
             network2.add_worker('test2.worker1', 'test_completing_worker.py').add_input('test1.feeder1')
             def deploy_handler2(error, context):
                 self.assert_null(error)
                 self.assert_not_null(context)
+                self.check_context(context)
             vertigo.deploy_local_network(network2, deploy_handler2)
         vertigo.deploy_local_network(network1, deploy_handler)
 
@@ -162,6 +198,7 @@ class NetworkTestCase(TestCase):
         def deploy_handler(error, context):
             self.assert_null(error)
             self.assert_not_null(context)
+            self.check_context(context)
         vertigo.deploy_local_network(network, deploy_handler)
 
 run_test(NetworkTestCase())
