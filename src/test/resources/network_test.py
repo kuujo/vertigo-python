@@ -13,6 +13,7 @@
 # limitations under the License.
 from test import TestCase, Assert, run_test
 import vertigo
+from vertigo.network import Verticle, Module
 from vertigo.context import NetworkContext, ComponentContext, InstanceContext
 from vertigo.grouping import RoundGrouping
 
@@ -75,6 +76,195 @@ class NetworkTestCase(TestCase):
         self.assert_equals('worker', component2.type)
         component2.main = 'test_worker_verticle.py'
         self.assert_equals('test_worker_verticle.py', component2.main)
+        self.complete()
+
+    def test_add_feeder(self):
+        """
+        Tests adding a feeder to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_feeder('test_feeder', main='test_feeder.py', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Verticle))
+        self.assert_equals('test_feeder.py', component.main)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.assert_false(component.worker)
+        component.worker = True
+        self.assert_true(component.worker)
+        self.assert_false(component.multi_threaded)
+        component.multi_threaded = True
+        self.assert_true(component.multi_threaded)
+        self.complete()
+
+    def test_add_feeder_module(self):
+        """
+        Tests adding a feeder to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_feeder_module('test_feeder', module='com.test~test~0.1', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Module))
+        self.assert_equals('com.test~test~0.1', component.module)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.complete()
+
+    def test_add_feeder_verticle(self):
+        """
+        Tests adding a feeder to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_feeder_verticle('test_feeder', main='test_feeder.py', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Verticle))
+        self.assert_equals('test_feeder.py', component.main)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.assert_false(component.worker)
+        component.worker = True
+        self.assert_true(component.worker)
+        self.assert_false(component.multi_threaded)
+        component.multi_threaded = True
+        self.assert_true(component.multi_threaded)
+        self.complete()
+
+    def test_add_executor(self):
+        """
+        Tests adding an executor to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_executor('test_executor', main='test_executor.py', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Verticle))
+        self.assert_equals('test_executor.py', component.main)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.assert_false(component.worker)
+        component.worker = True
+        self.assert_true(component.worker)
+        self.assert_false(component.multi_threaded)
+        component.multi_threaded = True
+        self.assert_true(component.multi_threaded)
+        self.complete()
+
+    def test_add_executor_module(self):
+        """
+        Tests adding an executor to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_executor_module('test_executor', module='com.test~test~0.1', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Module))
+        self.assert_equals('com.test~test~0.1', component.module)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.complete()
+
+    def test_add_executor_verticle(self):
+        """
+        Tests adding an executor to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_executor_verticle('test_executor', main='test_executor.py', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Verticle))
+        self.assert_equals('test_executor.py', component.main)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.assert_false(component.worker)
+        component.worker = True
+        self.assert_true(component.worker)
+        self.assert_false(component.multi_threaded)
+        component.multi_threaded = True
+        self.assert_true(component.multi_threaded)
+        self.complete()
+
+    def test_add_worker(self):
+        """
+        Tests adding a worker to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_worker('test_worker', main='test_worker.py', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Verticle))
+        self.assert_equals('test_worker.py', component.main)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.assert_false(component.worker)
+        component.worker = True
+        self.assert_true(component.worker)
+        self.assert_false(component.multi_threaded)
+        component.multi_threaded = True
+        self.assert_true(component.multi_threaded)
+        self.complete()
+
+    def test_add_worker_module(self):
+        """
+        Tests adding a worker to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_worker_module('test_worker', module='com.test~test~0.1', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Module))
+        self.assert_equals('com.test~test~0.1', component.module)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.complete()
+
+    def test_add_worker_verticle(self):
+        """
+        Tests adding a worker to a network.
+        """
+        network = vertigo.create_network('test')
+        self.assert_equals('test', network.address)
+        component = network.add_worker_verticle('test_worker', main='test_worker.py', config={'foo': 'bar'}, instances=2)
+        self.assert_true(isinstance(component, Verticle))
+        self.assert_equals('test_worker.py', component.main)
+        self.assert_equals('bar', component.config['foo'])
+        component.config = {'bar': 'baz'}
+        self.assert_equals('baz', component.config['bar'])
+        self.assert_equals(2, component.instances)
+        component.instances = 1
+        self.assert_equals(1, component.instances)
+        self.assert_false(component.worker)
+        component.worker = True
+        self.assert_true(component.worker)
+        self.assert_false(component.multi_threaded)
+        component.multi_threaded = True
+        self.assert_true(component.multi_threaded)
         self.complete()
     
     def test_add_input(self):

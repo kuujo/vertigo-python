@@ -13,10 +13,12 @@
 # limitations under the License.
 import net.kuujo.vertigo.network.Network
 import net.kuujo.vertigo.network.Component
+import net.kuujo.vertigo.network.Module
+import net.kuujo.vertigo.network.Verticle
 import net.kuujo.vertigo.hooks.EventBusHook
 import org.vertx.java.platform.impl.JythonVerticleFactory
 import org.vertx.java.core.json.JsonObject
-from core.javautils import map_to_java
+from core.javautils import map_from_java, map_to_java
 from context import InstanceContext
 from input import Input
 from grouping import Grouping
@@ -67,11 +69,11 @@ class Network(object):
     
     def get_ack_timeout(self):
         """Gets the network ack timeout."""
-        return self._network.getAckTimeout()
+        return self._network.getMessageTimeout()
     
     def set_ack_timeout(self, timeout):
         """Sets the network ack timeout."""
-        self._network.setAckTimeout(timeout)
+        self._network.setMessageTimeout(timeout)
     
     ack_timeout = property(get_ack_timeout, set_ack_timeout)
     
@@ -79,6 +81,18 @@ class Network(object):
         """Adds a component to the network."""
         self._network.addComponent(component._component)
         return component
+
+    def _add_component(self, method, address, main, config=None, instances=1):
+        component = None
+        if config is not None:
+            component = method(address, main, org.vertx.java.core.json.JsonObject(map_to_java(config)), instances)
+        else:
+            component = method(address, main, instances)
+
+        if isinstance(component, net.kuujo.vertigo.network.Module):
+            return Module(component)
+        elif isinstance(component, net.kuujo.vertigo.network.Verticle):
+            return Verticle(component)
 
     def add_feeder(self, address, main, config=None, instances=1):
         """Adds a feeder component to the network.
@@ -91,14 +105,33 @@ class Network(object):
     
         @return: A new feeder component definition.
         """
-        if main is not None and config is not None:
-            return Component(self._network.addFeeder(address, main, map_to_java(config), instances))
-        elif main is not None:
-            return Component(self._network.addFeeder(address, main, instances))
-        elif config is not None:
-            return Component(self._network.addFeeder(address, map_to_java(config), instances))
-        else:
-            return Component(self._network.addFeeder(address).setInstances(instances))
+        return self._add_component(self._network.addFeeder, address, main, config, instances)
+
+    def add_feeder_module(self, address, module, config=None, instances=1):
+        """Adds a feeder module to the network.
+    
+        Keyword arguments:
+        @param address: The component event bus address.
+        @param module: The feeder module name.
+        @param config: The feeder module configuration.
+        @param instances: The number of feeder instances.
+    
+        @return: A new feeder module definition.
+        """
+        return self._add_component(self._network.addFeederModule, address, module, config, instances)
+
+    def add_feeder_verticle(self, address, main, config=None, instances=1):
+        """Adds a feeder verticle to the network.
+    
+        Keyword arguments:
+        @param address: The component event bus address.
+        @param main: The feeder verticle main.
+        @param config: The feeder verticle configuration.
+        @param instances: The number of feeder instances.
+    
+        @return: A new feeder verticle definition.
+        """
+        return self._add_component(self._network.addFeederVerticle, address, main, config, instances)
 
     def add_executor(self, address, main, config=None, instances=1):
         """Adds an executor component to the network.
@@ -111,14 +144,33 @@ class Network(object):
     
         @return: A new executor component definition.
         """
-        if main is not None and config is not None:
-            return Component(self._network.addExecutor(address, main, map_to_java(config), instances))
-        elif main is not None:
-            return Component(self._network.addExecutor(address, main, instances))
-        elif config is not None:
-            return Component(self._network.addExecutor(address, map_to_java(config), instances))
-        else:
-            return Component(self._network.addExecutor(address).setInstances(instances))
+        return self._add_component(self._network.addExecutor, address, main, config, instances)
+
+    def add_executor_module(self, address, module, config=None, instances=1):
+        """Adds an executor module to the network.
+    
+        Keyword arguments:
+        @param address: The component event bus address.
+        @param module: The executor module name.
+        @param config: The executor module configuration.
+        @param instances: The number of executor instances.
+    
+        @return: A new executor module definition.
+        """
+        return self._add_component(self._network.addExecutorModule, address, module, config, instances)
+
+    def add_executor_verticle(self, address, main, config=None, instances=1):
+        """Adds an executor verticle to the network.
+    
+        Keyword arguments:
+        @param address: The component event bus address.
+        @param main: The executor verticle main.
+        @param config: The executor verticle configuration.
+        @param instances: The number of executor instances.
+    
+        @return: A new executor verticle definition.
+        """
+        return self._add_component(self._network.addExecutorVerticle, address, main, config, instances)
 
     def add_worker(self, address, main, config=None, instances=1):
         """Adds a worker component to the network.
@@ -131,14 +183,33 @@ class Network(object):
     
         @return: A new worker component definition.
         """
-        if main is not None and config is not None:
-            return Component(self._network.addWorker(address, main, map_to_java(config), instances))
-        elif main is not None:
-            return Component(self._network.addWorker(address, main, instances))
-        elif config is not None:
-            return Component(self._network.addWorker(address, map_to_java(config), instances))
-        else:
-            return Component(self._network.addWorker(address).setInstances(instances))
+        return self._add_component(self._network.addWorker, address, main, config, instances)
+
+    def add_worker_module(self, address, module, config=None, instances=1):
+        """Adds a worker module to the network.
+    
+        Keyword arguments:
+        @param address: The component event bus address.
+        @param module: The worker module name.
+        @param config: The worker module configuration.
+        @param instances: The number of worker instances.
+    
+        @return: A new worker module definition.
+        """
+        return self._add_component(self._network.addWorkerModule, address, module, config, instances)
+
+    def add_worker_verticle(self, address, main, config=None, instances=1):
+        """Adds a worker verticle to the network.
+    
+        Keyword arguments:
+        @param address: The component event bus address.
+        @param main: The worker verticle main.
+        @param config: The worker verticle configuration.
+        @param instances: The number of worker instances.
+    
+        @return: A new worker verticle definition.
+        """
+        return self._add_component(self._network.addWorkerVerticle, address, main, config, instances)
 
 class Component(object):
     """
@@ -179,26 +250,6 @@ class Component(object):
     def is_module(self):
         """Indicates whether this component is a module."""
         return self._component.isModule()
-    
-    def get_main(self):
-        """Gets the verticle main."""
-        return self._component.getMain()
-    
-    def set_main(self, main):
-        """Sets the verticle main."""
-        self._component.setMain(main)
-    
-    main = property(get_main, set_main)
-    
-    def get_module(self):
-        """Gets the module name."""
-        return self._component.getModule()
-    
-    def set_module(self, module):
-        """Sets the module name."""
-        self._component.setModule(module)
-    
-    module = property(get_module, set_module)
     
     def set_config(self, config):
         """Sets the component configuration."""
@@ -296,6 +347,50 @@ class Component(object):
             self.add_hook(event, handler)
             return handler
         return add_hook
+
+class Module(Component):
+    """A module component."""
+    def get_module(self):
+        """Gets the module name."""
+        return self._component.getModule()
+    
+    def set_module(self, module):
+        """Sets the module name."""
+        self._component.setModule(module)
+    
+    module = property(get_module, set_module)
+
+class Verticle(Component):
+    """A Verticle component."""
+    def get_main(self):
+        """Gets the verticle main."""
+        return self._component.getMain()
+    
+    def set_main(self, main):
+        """Sets the verticle main."""
+        self._component.setMain(main)
+    
+    main = property(get_main, set_main)
+
+    def is_worker(self):
+        """Indicates whether the verticle is a worker."""
+        return self._component.isWorker()
+
+    def set_worker(self, worker):
+        """Sets whether the verticle is a worker."""
+        self._component.setWorker(worker)
+
+    worker = property(is_worker, set_worker)
+
+    def is_multi_threaded(self):
+        """Indicates whether the verticle is multi-threaded."""
+        return self._component.isMultiThreaded()
+
+    def set_multi_threaded(self, multi_threaded):
+        """Sets whether the verticle is multi-threaded."""
+        self._component.setMultiThreaded(multi_threaded)
+
+    multi_threaded = property(is_multi_threaded, set_multi_threaded)
 
 class _ContextHandler(org.vertx.java.core.Handler):
     """A hook context handler."""

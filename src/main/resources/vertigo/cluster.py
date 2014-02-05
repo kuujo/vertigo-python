@@ -26,7 +26,7 @@ class _AbstractCluster(object):
         if self._handlercls is not None:
             self._cluster = self._handlercls(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container, *args)
     
-    def deploy(self, network, handler=None):
+    def deploy_network(self, network, handler=None):
         """Deploys a network.
 
         Keyword arguments:
@@ -39,8 +39,11 @@ class _AbstractCluster(object):
         else:
             self._cluster.deploy(network._network)
         return self
+
+    def deploy(self, network, handler=None):
+        return self.deploy_network(network, handler)
     
-    def shutdown(self, context, handler=None):
+    def shutdown_network(self, context, handler=None):
         """Shuts down a network.
 
         Keyword arguments:
@@ -53,6 +56,9 @@ class _AbstractCluster(object):
         else:
             self._cluster.shutdown(context._context)
         return self
+
+    def shutdown(self, context, handler=None):
+        return self.shutdown_network(context, handler)
 
 class LocalCluster(_AbstractCluster):
     """A local cluster."""

@@ -35,9 +35,14 @@ class Component(object):
         return InstanceContext(self._component.getContext())
 
     @property
+    def logger(self):
+        """The component logger."""
+        return self._component.logger()
+
+    @property
     def config(self):
         """The component configuration."""
-        return map_from_java(self._component.getContext().getComponent().getConfig().toMap())
+        return map_from_java(self._component.context().component().config().toMap())
 
     def declare_schema(self, fields):
         """Declares a schema for the component."""
