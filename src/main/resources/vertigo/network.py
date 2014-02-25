@@ -37,11 +37,11 @@ class Network(object):
     def get_num_auditors(self):
         """The number of network auditors."""
         return self._network.getNumAuditors()
-    
+
     def set_num_auditors(self, num):
         """The number of network auditors."""
         self._network.setNumAuditors(num)
-    
+
     num_auditors = property(get_num_auditors, set_num_auditors)
 
     def enable_acking(self):
@@ -53,30 +53,40 @@ class Network(object):
         """Disables acking on the network."""
         self._network.disableAcking()
         return self
-    
+
     def set_acking(self, acking):
         """Sets network acking."""
         if acking:
           self._network.enableAcking()
         else:
           self._network.disableAcking()
-    
+
     def get_acking(self):
         """Gets network acking."""
         return self._network.isAckingEnabled()
-    
+
     acking = property(get_acking, set_acking)
-    
+
     def get_ack_timeout(self):
         """Gets the network ack timeout."""
         return self._network.getMessageTimeout()
-    
+
     def set_ack_timeout(self, timeout):
         """Sets the network ack timeout."""
         self._network.setMessageTimeout(timeout)
-    
+
     ack_timeout = property(get_ack_timeout, set_ack_timeout)
-    
+
+    def get_message_timeout(self):
+        """Gets the network message timeout."""
+        return self._network.getMessageTimeout()
+
+    def set_message_timeout(self, timeout):
+        """Sets the network message timeout."""
+        self._network.setMessageTimeout(timeout)
+
+    message_timeout = property(get_message_timeout, set_message_timeout)
+
     def add_component(self, component):
         """Adds a component to the network."""
         self._network.addComponent(component._component)

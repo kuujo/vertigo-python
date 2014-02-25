@@ -20,6 +20,26 @@ class Input(object):
     def __init__(self, javaobj):
         self._input = javaobj
 
+    def set_stream(self, stream):
+        """Sets the input stream.
+
+        Keyword arguments:
+        @param stream: the input stream name.
+
+        @return: self
+        """
+        self._input.setStream(stream)
+        return self
+
+    def get_stream(self):
+        """Gets the input stream.
+
+        @return: the input stream name.
+        """
+        return self._input.getStream()
+
+    stream = property(get_stream, set_stream)
+
     def group_by(self, grouping):
         """Sets a grouping on the input.
 

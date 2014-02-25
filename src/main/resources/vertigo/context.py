@@ -52,6 +52,11 @@ class NetworkContext(_AbstractContext):
         return self._context.isAckingEnabled()
 
     @property
+    def message_timeout(self):
+        """The network message timeout."""
+        return self._context.messageTimeout()
+
+    @property
     def ack_timeout(self):
         """The network ack timeout."""
         return self._context.messageTimeout()
@@ -59,7 +64,7 @@ class NetworkContext(_AbstractContext):
     @property
     def components(self):
         """A dictionary of component contexts, keyed by component addresses."""
-        collection = self._context.componentContexts()
+        collection = self._context.components()
         iterator = collection.iterator()
         components = {}
         while iterator.hasNext():
@@ -82,7 +87,7 @@ class ComponentContext(_AbstractContext):
     @property
     def type(self):
         """The component type."""
-        return net.kuujo.vertigo.util.Component.serializeType(self._context.getType())
+        return net.kuujo.vertigo.util.Component.serializeType(self._context.type())
 
     @property
     def is_module(self):
@@ -97,12 +102,12 @@ class ComponentContext(_AbstractContext):
     @property
     def config(self):
         """The component configuration."""
-        return map_from_java(self._context.getConfig().toMap())
+        return map_from_java(self._context.config().toMap())
 
     @property
     def instances(self):
         """A list of component instance contexts."""
-        collection = self._context.instanceContexts()
+        collection = self._context.instances()
         iterator = collection.iterator()
         instances = []
         while iterator.hasNext():
@@ -112,7 +117,7 @@ class ComponentContext(_AbstractContext):
     @property
     def network(self):
         """The parent network context."""
-        return NetworkContext(self._context.getNetwork())
+        return NetworkContext(self._context.network())
 
 class ModuleContext(ComponentContext):
     """A module component context."""
@@ -150,4 +155,4 @@ class InstanceContext(_AbstractContext):
     @property
     def component(self):
         """The parent component context."""
-        return ComponentContext(self._context.getComponent())
+        return ComponentContext(self._context.component())

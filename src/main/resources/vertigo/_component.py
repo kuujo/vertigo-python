@@ -32,7 +32,7 @@ class Component(object):
     @property
     def context(self):
         """The component context."""
-        return InstanceContext(self._component.getContext())
+        return InstanceContext(self._component.context())
 
     @property
     def logger(self):
