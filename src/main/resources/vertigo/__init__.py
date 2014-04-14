@@ -1,4 +1,4 @@
-# Copyright 2013 the original author or authors.
+# Copyright 2014 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,122 +12,100 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-import net.kuujo.vertigo.util.Factory
-import net.kuujo.vertigo.util.Component
+import net.kuujo.vertigo.Vertigo
 import org.vertx.java.platform.impl.JythonVerticleFactory
-from context import NetworkContext
-from network import Network
+from core.java_utils import map_to_java
+from config import NetworkConfig, ActiveNetwork
 
 this = sys.modules[__name__]
 
-_vertigo = net.kuujo.vertigo.util.Factory.createVertigo(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
+_vertigo = net.kuujo.vertigo.Vertigo(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
 
-logger = org.vertx.java.platform.impl.JythonVerticleFactory.container.logger()
+try:
+    import _component
+except ImportError:
+    component = None
+else:
+    component = _component
 
-# Note: This method must come before the component module is imported
-# due to a recursive dependency.
-def is_component():
-    """
-    Indicates whether the current verticle is a Vertigo component instance.
-
-    @return: A boolean indicating whether the current Vert.x verticle is
-    a Vertigo component instance.
-    """
-    return _vertigo.isComponent()
-
-if is_component():
-    _component_type = net.kuujo.vertigo.util.Component.serializeType(_vertigo.context().getComponent().getType())
-    if _component_type == 'feeder':
-        from . import _feeder
-        feeder = _feeder.Feeder(_vertigo.component()).start()
-    elif _component_type == 'executor':
-        from . import _executor
-        executor = _executor.Executor(_vertigo.component()).start()
-    elif _component_type == 'worker':
-        from . import _worker
-        worker = _worker.Worker(_vertigo.component()).start()
-    else:
-        raise ImportError("Unknown Vertigo component type %s" % (_component_type,))
-
-def create_network(address):
-    """
-    Creates a new network.
+def create_network(network):
+    """Creates a new network.
 
     Keyword arguments:
-    @param address: The network address.
+    @param name: The network name or dictionary configuration.
 
     @return: A new network instance.
     """
-    return Network(_vertigo.createNetwork(address))
+    if isinstance(network, dict):
+        return NetworkConfig(_vertigo.createNetworkFromJson(map_to_java(network)))
+    return NetworkConfig(_vertigo.createNetwork(name))
 
 def deploy_local_network(network, handler=None):
     """
     Deploys a local network.
 
     Keyword arguments:
-    @param network: The network to deploy.
+    @param network: The network name or configuration to deploy.
     @param handler: An optional asynchronous handler to be called once the deployment
     is complete.
 
     @return: The current vertigo instance.
     """
     if handler is not None:
-        _vertigo.deployLocalNetwork(network._network, _DeployHandler(handler))
+        _vertigo.deployLocalNetwork(network if isinstance(network, basestring) else network.java_obj, _DeployHandler(handler))
     else:
-        _vertigo.deployLocalNetwork(network._network)
+        _vertigo.deployLocalNetwork(network if isinstance(network, basestring) else network.java_obj)
     return this
 
-def shutdown_local_network(context, handler=None):
+def undeploy_local_network(network, handler=None):
     """
-    Shuts down a local network.
+    Undeploys a local network.
 
     Keyword arguments:
-    @param context: The network context for the network to shutdown.
-    @param handler: An optional asynchronous handler to be called once the shutdown
+    @param context: The network configuration or name for the network to undeploy.
+    @param handler: An optional asynchronous handler to be called once the undeployment
     is complete.
 
     @return: The current vertigo instance.
     """
     if handler is not None:
-        _vertigo.shutdownLocalNetwork(context._context, _ShutdownHandler(handler))
+        _vertigo.undeployLocalNetwork(network if isinstance(network, basestring) else network.java_obj, _UndeployHandler(handler))
     else:
-        _vertigo.shutdownLocalNetwork(context._context)
+        _vertigo.undeployLocalNetwork(network if isinstance(network, basestring) else network.java_obj)
     return this
 
-def deploy_remote_network(address, network, handler=None):
+def deploy_remote_network(network, handler=None):
     """
     Deploys a remote network.
 
     Keyword arguments:
-    @param address: The event bus address to which to deploy modules and verticles.
-    @param network: The network to deploy.
+    @param network: The network name or configuration to deploy.
     @param handler: An optional asynchronous handler to be called once the deployment
     is complete.
 
     @return: The current vertigo instance.
     """
     if handler is not None:
-        _vertigo.deployRemoteNetwork(address, network._network, _DeployHandler(handler))
+        _vertigo.deployRemoteNetwork(network if isinstance(network, basestring) else network.java_obj, _DeployHandler(handler))
     else:
-        _vertigo.deployRemoteNetwork(address, network._network)
+        _vertigo.deployRemoteNetwork(network if isinstance(network, basestring) else network.java_obj)
     return this
 
-def shutdown_remote_network(address, context, handler=None):
+def undeploy_remote_network(network, handler=None):
     """
-    Shuts down a remote network.
+    Undeploys a remote network.
 
     Keyword arguments:
-    @param address: The event bus address to which to deploy modules and verticles.
-    @param context: The network context for the network to shutdown.
-    @param handler: An optional asynchronous handler to be called once the shutdown
+    @param context: The network configuration or name for the network to undeploy.
+    @param handler: An optional asynchronous handler to be called once the undeployment
     is complete.
 
     @return: The current vertigo instance.
     """
     if handler is not None:
-        _vertigo.shutdownRemoteNetwork(address, context._context, _ShutdownHandler(handler))
+        _vertigo.undeployRemoteNetwork(network if isinstance(network, basestring) else network._network, _UndeployHandler(handler))
     else:
-        _vertigo.shutdownRemoteNetwork(address, context._context)
+        _vertigo.undeployRemoteNetwork(network if isinstance(network, basestring) else network._network)
     return this
 
 class _DeployHandler(org.vertx.java.core.AsyncResultHandler):
@@ -135,11 +113,11 @@ class _DeployHandler(org.vertx.java.core.AsyncResultHandler):
         self._handler = handler
     def handle(self, result):
         if result.succeeded():
-            self._handler(None, NetworkContext(result.result()))
+            self._handler(None, ActiveNetwork(result.result()))
         else:
             self._handler(result.cause(), None)
 
-class _ShutdownHandler(org.vertx.java.core.AsyncResultHandler):
+class _UndeployHandler(org.vertx.java.core.AsyncResultHandler):
     def __init__(self, handler):
         self._handler = handler
     def handle(self, result):
