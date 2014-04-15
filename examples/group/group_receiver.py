@@ -11,18 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import vertx
 from vertigo import component
 
-@component.start_handler
-def start_handler(error, component):
-    if not error:
-        words = vertx.config['words']
+port = component.input.port('in')
 
-        def do_send():
-            while not component.output.out.send_queue_full():
-                component.output.out.send(words[rand(len(words) - 1)])
+@port.group_handler('sentences')
+def sentences_handler(group):
+    counts = []
 
-            @component.output.out.drain_handler
-            def drain_handler():
-                do_send()
+    @group.group_handler('words')
+    def words_handler(group):
+        words = []
+
+        # Each time a word in this group is received this handler will be called.
+        @group.message_handler
+        def message_handler(word):
+            words.append(word)
+
+        # This handler will be called once all words for the group have been received.
+        @group.end_handler
+        def end_handler():
+            counts.append(len(words))

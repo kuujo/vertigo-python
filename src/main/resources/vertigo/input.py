@@ -12,12 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import org.vertx.java.core.Handler
-from core.java_utils import map_from_java
+from core.javautils import map_from_java
 
 class InputCollector(object):
     """Input collector."""
     def __init__(self, java_obj):
         self.java_obj = java_obj
+        self._ports = {}
+
+    def port(self, name):
+        """Returns an input port by name.
+
+        Keyword arguments:
+        @param name: The name of the port to get.
+
+        @return: An input port.
+        """
+        if name not in self._ports:
+            self._ports[name] = InputPort(self.java_obj.port(name))
+        return self._ports[name]
 
     def __getattr__(self, name):
         if self.__dict__.has_key(name):
@@ -30,14 +43,35 @@ class Input(object):
         self.java_obj = java_obj
 
     def pause(self):
+        """Pauses the input."""
         self.java_obj.pause()
         return self
 
     def resume(self):
+        """Resumes the input."""
         self.java_obj.resume()
         return self
 
+    def message_handler(self, handler):
+        """Sets a message handler on the input.
+
+        Keyword arguments:
+        @param handler: A handler to be called when a message is received on the input.
+
+        @return: self
+        """
+        self.java_obj.messageHandler(MessageHandler(handler))
+        return self
+
     def group_handler(self, name, handler=None):
+        """Sets a group handler on the input.
+
+        Keyword arguments:
+        @param name: The name of the group to handle.
+        @param handler: A handler to be called when a group of the given name is received.
+
+        @return: self
+        """
         if handler is None:
             def wrap(handler):
                 self.java_obj.groupHandler(name, GroupHandler(handler))
@@ -46,14 +80,10 @@ class Input(object):
             self.java_obj.groupHandler(name, GroupHandler(handler))
             return self
 
-    def message_handler(self, handler):
-        self.java_obj.messageHandler(MessageHandler(handler))
-        return self
-
-class InputPort(object):
+class InputPort(Input):
     """Input port."""
 
-class InputGroup(object):
+class InputGroup(Input):
     """Input group."""
 
 class GroupHandler(org.vertx.java.core.Handler):

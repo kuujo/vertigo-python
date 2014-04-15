@@ -11,15 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from vertigo import worker
+from vertigo import component
 
 counts = {}
 
-@worker.message_handler
-def message_handler(message):
+port = component.input.port('in')
+
+@port.message_handler
+def message_handler(word):
     try:
-        counts[message.body['word']]
+        counts[word]
     except KeyError:
-        counts[message.body['word']] = 0
-    counts[message.body['word']] += 1
-    worker.emit({'word': message.body['word'], 'count': counts[message.body['word']]}, parent=message)
+        counts[word] = 0
+    counts[word] += 1
+    component.output.port('out').send((word, counts[word]))

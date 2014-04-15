@@ -14,19 +14,12 @@
 import sys
 import net.kuujo.vertigo.Vertigo
 import org.vertx.java.platform.impl.JythonVerticleFactory
-from core.java_utils import map_to_java
+from core.javautils import map_to_java
 from config import NetworkConfig, ActiveNetwork
 
 this = sys.modules[__name__]
 
 _vertigo = net.kuujo.vertigo.Vertigo(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
-
-try:
-    import _component
-except ImportError:
-    component = None
-else:
-    component = _component
 
 def create_network(network):
     """Creates a new network.
@@ -37,8 +30,8 @@ def create_network(network):
     @return: A new network instance.
     """
     if isinstance(network, dict):
-        return NetworkConfig(_vertigo.createNetworkFromJson(map_to_java(network)))
-    return NetworkConfig(_vertigo.createNetwork(name))
+        return NetworkConfig(_vertigo.createNetwork(map_to_java(network)))
+    return NetworkConfig(_vertigo.createNetwork(network))
 
 def deploy_local_network(network, handler=None):
     """

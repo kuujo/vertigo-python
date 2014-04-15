@@ -11,18 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import vertx
 from vertigo import component
+from test import Test, Assert
 
-@component.start_handler
-def start_handler(error, component):
-    if not error:
-        words = vertx.config['words']
-
-        def do_send():
-            while not component.output.out.send_queue_full():
-                component.output.out.send(words[rand(len(words) - 1)])
-
-            @component.output.out.drain_handler
-            def drain_handler():
-                do_send()
+def message_handler(message):
+    Assert.equals("Hello world!", message)
+    Test.complete()
+component.input.port('in').message_handler(message_handler)
