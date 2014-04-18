@@ -15,7 +15,7 @@ import sys
 import net.kuujo.vertigo.Vertigo
 import org.vertx.java.platform.impl.JythonVerticleFactory
 from core.javautils import map_to_java
-from config import NetworkConfig, ActiveNetwork
+from network import NetworkConfig, ActiveNetwork
 
 this = sys.modules[__name__]
 
