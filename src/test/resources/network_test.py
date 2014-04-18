@@ -38,6 +38,6 @@ class NetworkTestCase(TestCase):
         network.create_connection(('sender', 'out'), ('receiver', 'in'))
         def handler(error, network):
             self.assert_null(error)
-        vertigo.deploy_local_network(network, handler)
+        vertigo.deploy_network(network, handler)
 
 run_test(NetworkTestCase())

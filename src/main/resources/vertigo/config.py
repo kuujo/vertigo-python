@@ -15,6 +15,7 @@ import org.vertx.java.core.AsyncResultHandler
 from core.javautils import map_from_java, map_to_java
 import net.kuujo.vertigo.network.ModuleConfig
 import net.kuujo.vertigo.network.VerticleConfig
+import net.kuujo.vertigo.cluster.ClusterScope
 
 class Config(object):
     """Base configuration."""
@@ -23,10 +24,24 @@ class Config(object):
 
 class NetworkConfig(Config):
     """Network configuration."""
+    SCOPE_LOCAL = "local"
+    SCOPE_CLUSTER = "cluster"
+
     @property
     def name(self):
         """Returns the network name."""
         return self.java_obj.getName()
+
+    def get_scope(self):
+        """Returns the network scope."""
+        return self.java_obj.getScope().toString()
+
+    def set_scope(self, scope):
+        """Sets the network scope."""
+        self.java_obj.setScope(net.kuujo.vertigo.cluster.ClusterScope.parse(scope))
+        return self
+
+    scope = property(get_scope, set_scope)
 
     def add_component(self, name, main, config=None, instances=1):
         """Adds a component to the network.

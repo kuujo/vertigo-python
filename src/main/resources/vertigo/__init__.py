@@ -33,9 +33,9 @@ def create_network(network):
         return NetworkConfig(_vertigo.createNetwork(map_to_java(network)))
     return NetworkConfig(_vertigo.createNetwork(network))
 
-def deploy_local_network(network, handler=None):
+def deploy_network(network, handler=None):
     """
-    Deploys a local network.
+    Deploys a network.
 
     Keyword arguments:
     @param network: The network name or configuration to deploy.
@@ -45,14 +45,14 @@ def deploy_local_network(network, handler=None):
     @return: The current vertigo instance.
     """
     if handler is not None:
-        _vertigo.deployLocalNetwork(network if isinstance(network, basestring) else network.java_obj, _DeployHandler(handler))
+        _vertigo.deployNetwork(network if isinstance(network, basestring) else network.java_obj, _DeployHandler(handler))
     else:
-        _vertigo.deployLocalNetwork(network if isinstance(network, basestring) else network.java_obj)
+        _vertigo.deployNetwork(network if isinstance(network, basestring) else network.java_obj)
     return this
 
-def undeploy_local_network(network, handler=None):
+def undeploy_network(network, handler=None):
     """
-    Undeploys a local network.
+    Undeploys a network.
 
     Keyword arguments:
     @param context: The network configuration or name for the network to undeploy.
@@ -62,43 +62,9 @@ def undeploy_local_network(network, handler=None):
     @return: The current vertigo instance.
     """
     if handler is not None:
-        _vertigo.undeployLocalNetwork(network if isinstance(network, basestring) else network.java_obj, _UndeployHandler(handler))
+        _vertigo.undeployNetwork(network if isinstance(network, basestring) else network.java_obj, _UndeployHandler(handler))
     else:
-        _vertigo.undeployLocalNetwork(network if isinstance(network, basestring) else network.java_obj)
-    return this
-
-def deploy_remote_network(network, handler=None):
-    """
-    Deploys a remote network.
-
-    Keyword arguments:
-    @param network: The network name or configuration to deploy.
-    @param handler: An optional asynchronous handler to be called once the deployment
-    is complete.
-
-    @return: The current vertigo instance.
-    """
-    if handler is not None:
-        _vertigo.deployRemoteNetwork(network if isinstance(network, basestring) else network.java_obj, _DeployHandler(handler))
-    else:
-        _vertigo.deployRemoteNetwork(network if isinstance(network, basestring) else network.java_obj)
-    return this
-
-def undeploy_remote_network(network, handler=None):
-    """
-    Undeploys a remote network.
-
-    Keyword arguments:
-    @param context: The network configuration or name for the network to undeploy.
-    @param handler: An optional asynchronous handler to be called once the undeployment
-    is complete.
-
-    @return: The current vertigo instance.
-    """
-    if handler is not None:
-        _vertigo.undeployRemoteNetwork(network if isinstance(network, basestring) else network._network, _UndeployHandler(handler))
-    else:
-        _vertigo.undeployRemoteNetwork(network if isinstance(network, basestring) else network._network)
+        _vertigo.undeployNetwork(network if isinstance(network, basestring) else network.java_obj)
     return this
 
 class _DeployHandler(org.vertx.java.core.AsyncResultHandler):
