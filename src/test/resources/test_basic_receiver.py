@@ -14,7 +14,7 @@
 from vertigo import input
 from test import Test, Assert
 
+@input.message_handler(port='in')
 def message_handler(message):
     Assert.equals("Hello world!", message)
     Test.complete()
-input.port('in').message_handler(message_handler)

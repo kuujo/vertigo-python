@@ -15,4 +15,6 @@ from vertigo import component, output
 
 @component.start_handler
 def start_handler(error, component):
-    output.send('out', "Hello world!")
+    @output.group(port='out', group='foo')
+    def group(group):
+        group.send('foo').send('bar').send('baz').end()

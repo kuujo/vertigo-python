@@ -11,8 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from vertigo import component, output
+from vertigo import input
+from test import Test, Assert
 
-@component.start_handler
-def start_handler(error, component):
-    output.send('out', "Hello world!")
+@input.group_handler(port='in', group='foo')
+def foo_handler(group):
+    messages = []
+
+    @group.message_handler
+    def message_handler(message):
+        messages.append(message)
+
+    @group.end_handler
+    def end_handler():
+        Assert.true('foo' in messages)
+        Assert.true('bar' in messages)
+        Assert.true('baz' in messages)
+        Test.complete()

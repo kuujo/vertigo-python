@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import component
+import sys, component
 import org.vertx.java.core.Handler
 from core.javautils import map_to_java
 
 if component._component is None:
     raise ImportError("Not a valid Vertigo component.")
+
+this = sys.modules[__name__]
 
 _ports = {}
 
@@ -31,6 +33,28 @@ def port(name):
     if name not in _ports:
         _ports[name] = OutputPort(component._component.output().port(name))
     return _ports[name]
+
+get_port = port
+
+def send(port, message):
+    """Sends a message on an output port.
+
+    Keyword arguments:
+    @param port: The port on which to send the message.
+    @param message: The message to send.
+    """
+    get_port(port).send(message)
+    return this
+
+def group(port, group, handler=None):
+    """Creates a group for a specific port.
+
+    Keyword arguments:
+    @param port: The port for which to create the group.
+    @param group: The name of the group to create.
+    @param handler: A handler to be called once the group has been created.
+    """
+    return get_port(port).group(group, handler)
 
 class Output(object):
     """Base output."""
@@ -89,6 +113,9 @@ class OutputPort(Output):
 
 class OutputGroup(Output):
     """Output group."""
+    def end(self):
+        """Ends the output group."""
+        self.java_obj.end()
 
 class GroupHandler(org.vertx.java.core.Handler):
     def __init__(self, handler):
