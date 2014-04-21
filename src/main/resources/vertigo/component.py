@@ -14,16 +14,13 @@
 import sys
 import org.vertx.java.platform.impl.JythonVerticleFactory
 import net.kuujo.vertigo.util.Factories.createComponent
-from cluster import Cluster
-from input import InputCollector
-from output import OutputCollector
 
 __this = sys.modules[__name__]
 
-__component = None
+_component = None
 
 try:
-    __component = net.kuujo.vertigo.util.Factories.createComponent(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
+    _component = net.kuujo.vertigo.util.Factories.createComponent(org.vertx.java.platform.impl.JythonVerticleFactory.vertx, org.vertx.java.platform.impl.JythonVerticleFactory.container)
 except:
     raise ImportError("Not a valid component instance.")
 
@@ -47,10 +44,4 @@ class StartHandler(org.vertx.java.core.AsyncResultHandler):
         __started = result
         __check_start()
 
-__component.start(StartHandler())
-
-cluster = Cluster(__component.cluster())
-logger = __component.logger()
-input = InputCollector(__component.input())
-output = OutputCollector(__component.output())
-            
+_component.start(StartHandler())

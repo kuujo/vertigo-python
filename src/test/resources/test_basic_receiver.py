@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from vertigo import component
+from vertigo import input
 from test import Test, Assert
 
 def message_handler(message):
     Assert.equals("Hello world!", message)
     Test.complete()
-component.input.port('in').message_handler(message_handler)
+input.port('in').message_handler(message_handler)

@@ -11,31 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import component
 import org.vertx.java.core.Handler
 from core.javautils import map_from_java
 
-class InputCollector(object):
-    """Input collector."""
-    def __init__(self, java_obj):
-        self.java_obj = java_obj
-        self._ports = {}
+if component._component is None:
+    raise ImportError("Not a valid Vertigo component.")
 
-    def port(self, name):
-        """Returns an input port by name.
+_ports = {}
 
-        Keyword arguments:
-        @param name: The name of the port to get.
+def port(name):
+    """Returns an input port by name.
 
-        @return: An input port.
-        """
-        if name not in self._ports:
-            self._ports[name] = InputPort(self.java_obj.port(name))
-        return self._ports[name]
+    Keyword arguments:
+    @param name: The name of the port to load.
 
-    def __getattr__(self, name):
-        if self.__dict__.has_key(name):
-            return self.__dict__.get(name)
-        return InputPort(self.java_obj.port(name))
+    @returns: An input port.
+    """
+    if name not in _ports:
+        _ports[name] = InputPort(component._component.input().port(name))
+    return _ports[name]
 
 class Input(object):
     """Base input."""

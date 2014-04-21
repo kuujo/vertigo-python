@@ -11,31 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import component
 import org.vertx.java.core.Handler
 from core.javautils import map_to_java
 
-class OutputCollector(object):
-    """Output collector."""
-    def __init__(self, java_obj):
-        self.java_obj = java_obj
-        self._ports = {}
+if component._component is None:
+    raise ImportError("Not a valid Vertigo component.")
 
-    def port(self, name):
-        """Loads an output port.
+_ports = {}
 
-        Keyword arguments:
-        @param name: The output port name.
+def port(name):
+    """Loads an output port.
 
-        @return: An output port.
-        """
-        if name not in self._ports:
-            self._ports[name] = OutputPort(self.java_obj.port(name))
-        return self._ports[name]
+    Keyword arguments:
+    @param name: The output port name.
 
-    def __getattr__(self, name):
-        if self.__dict__.has_key(name):
-            return self.__dict__.get(name)
-        return OutputPort(self.java_obj.port(name))
+    @return: An output port.
+    """
+    if name not in _ports:
+        _ports[name] = OutputPort(component._component.output().port(name))
+    return _ports[name]
 
 class Output(object):
     """Base output."""

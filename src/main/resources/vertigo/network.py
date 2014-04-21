@@ -250,29 +250,29 @@ class ConnectionConfig(Config):
         """Returns the connection target."""
         return Endpoint(self.java_obj.getTarget())
 
-    def random_groupin(self):
-        """Sets a random grouping on the connection."""
-        self.java_obj.randomGrouping()
+    def random_select(self):
+        """Sets a random selector on the connection."""
+        self.java_obj.randomSelect()
         return self
 
-    def round_grouping(self):
-        """Sets a round grouping on the connection."""
-        self.java_obj.roundGrouping()
+    def round_select(self):
+        """Sets a round selector on the connection."""
+        self.java_obj.roundSelect()
         return self
 
-    def hash_grouping(self):
-        """Sets a hash grouping on the connection."""
-        self.java_obj.hashGrouping()
+    def hash_select(self):
+        """Sets a hash selector on the connection."""
+        self.java_obj.hashSelect()
         return self
 
-    def fair_grouping(self):
-        """Sets a fair grouping on the connection."""
-        self.java_obj.fairGrouping()
+    def fair_select(self):
+        """Sets a fair selector on the connection."""
+        self.java_obj.fairSelect()
         return self
 
-    def all_grouping(self):
-        """Sets an all grouping on the connection."""
-        self.java_obj.allGrouping()
+    def all_select(self):
+        """Sets an all selector on the connection."""
+        self.java_obj.allSelect()
         return self
 
     class Endpoint(Config):
