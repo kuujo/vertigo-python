@@ -13,7 +13,7 @@
 # limitations under the License.
 import sys
 import org.vertx.java.platform.impl.JythonVerticleFactory
-import net.kuujo.vertigo.util.Factories.createComponent
+import net.kuujo.vertigo.util.Factories
 
 __this = sys.modules[__name__]
 
@@ -31,7 +31,7 @@ def __check_start():
         if __started.failed():
             __start_handler(__started.cause(), None)
         else:
-            __start_handler(None, __this)
+            __start_handler(None)
 
 def start_handler(handler):
     global __start_handler
