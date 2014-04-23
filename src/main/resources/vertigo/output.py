@@ -113,6 +113,11 @@ class OutputPort(Output):
 
 class OutputGroup(Output):
     """Output group."""
+    @property
+    def id(self):
+        """Returns the unique group identifier."""
+        return self.java_obj.id()
+
     def end(self):
         """Ends the output group."""
         self.java_obj.end()

@@ -110,6 +110,11 @@ class InputPort(Input):
 
 class InputGroup(Input):
     """Input group."""
+    @property
+    def id(self):
+        """Returns the unique group ID."""
+        return self.java_obj.id()
+
     def start_handler(self, handler):
         """Sets a start handler on the group.
 
