@@ -412,14 +412,10 @@ Vertigo components send and receive messages using only output and input *ports*
 and are hidden from event bus address details which are defined in network configurations.
 This is the element that makes Vertigo components reusable.
 
-Vertigo messages are guaranteed to arrive in order. See [how it works](#how-it-works)
-for more information.
-
-Vertigo also provides an API that allows for logical grouping and ordering of messages
-known as [groups](#working-with-message-groups). Groups are strongly ordered named
-batches of messages that can be nested.
-
-For more information on messaging see [how Vertigo handles messaging](#how-vertigo-handles-messaging)
+Vertigo messages are guaranteed to arrive in order. Vertigo also provides an API
+that allows for logical grouping and ordering of collections of messages known as
+[groups](#working-with-message-groups). Groups are strongly ordered named batches
+of messages that can be nested.
 
 ### Sending messages on an output port
 To reference an output port, use the `output.port(name)` method.
@@ -469,18 +465,16 @@ wrapper. This is because Vertigo messages are inherently uni-directional, and me
 acking is handled internally.
 
 ### Working with message groups
-The base Vertigo messaging system does not guarantee ordering of messages.
-But Vertigo does provide a mechanism for logically grouping and ordering
-messages known as *groups*. Groups are named logical collections of messages.
-Groups can be nested and groups of the same name are guaranteed to be delivered
-in order. Before any given group can start, each of the groups of the same name
-at the same level that preceeded it must have been received by the target.
-Additionally, messages within a group are guaranteed to be delivered to the
-same instance of each target component. In other words, routing is performed
-per-group rather than per-message.
+Vertigo provides a mechanism for logically grouping messages appropriately
+named *groups*. Groups are logical collections of messsages that are strongly
+ordered by name. Before any given group can stat, each of the groups of the same
+name at the same level that preceeded it must have been completed. Additionally,
+messages within a group are *guaranteed to be delivered to the same instance* of each
+target component. In other words, routing is performed per-group rather than per-message.
 
 When a new output group is created, Vertigo will await the completion of all groups
-that were created prior to the new group before sending the new group's messages.
+of the same name that were created prior to the new group before sending the new group's
+messages.
 
 ```python
 def group_handler(group):
@@ -572,6 +566,70 @@ def foo_handler(group):
     @group.message_handler
     def message_handler(message):
       output.port('out').send(message)
+```
+
+## Logging
+Ecah Vertigo component contains a special *port logger* which logs messages
+to component output ports in addition to standard Vert.x log files. This allows
+other components to listen for log messages on input ports.
+
+The port logger logs to ports named for each logger method:
+* `fatal`
+* `error`
+* `warn`
+* `info`
+* `debug`
+* `trace`
+
+### Logging messages to output ports
+The port logger simply exposes the standard Vert.x logger interface.
+So, to log a message to an output port simply call the appropriate log method:
+
+```python
+from vertigo import component, logger
+
+@component.start_handler
+def start_handler(error=None):
+  if not error:
+    logger.info("Component started successfully!")
+```
+
+### Reading log messages
+To listen for log messages from a component, simply add a connection to a network
+configuration listening on the necessary output port. For instance, you could
+aggregate and count log messages from one component by connecting each log port to
+a single input port on another component.
+
+```python
+import vertigo
+
+network = vertigo.create_network('log-test')
+network.add_verticle('logger', main='logger.js', instances=2)
+network.add_verticle('log-reader', 'log_reader.py', instances=2)
+network.create_connection(('logger', 'fatal'), ('log-reader', 'log'), selector='hash')
+network.create_connection(('logger', 'error'), ('log-reader', 'log'), selector='hash')
+network.create_connection(('logger', 'warn'), ('log-reader', 'log'), selector='hash')
+network.create_connection(('logger', 'info'), ('log-reader', 'log'), selector='hash')
+network.create_connection(('logger', 'debug'), ('log-reader', 'log'), selector='hash')
+network.create_connection(('logger', 'trace'), ('log-reader', 'log'), selector='hash')
+```
+
+With a hash selector on each connection, we guarantee that the same log message
+will always go to the same `log-reader` instance.
+
+Log messages will arrive as simple strings:
+
+```python
+from vertigo import input, output
+
+counts = {}
+
+@input.message_handler('log')
+def log_message_handler(message):
+  if message not in counts:
+    counts[message] = 0
+  counts[message] += 1
+  output.send('count', counts[message])
 ```
 
 ## How it works

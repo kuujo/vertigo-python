@@ -16,6 +16,11 @@ from core.javautils import map_from_java, map_to_java
 import net.kuujo.vertigo.network.ModuleConfig
 import net.kuujo.vertigo.network.VerticleConfig
 import net.kuujo.vertigo.cluster.ClusterScope
+import net.kuujo.vertigo.io.selector.RoundRobinSelector
+import net.kuujo.vertigo.io.selector.RandomSelector
+import net.kuujo.vertigo.io.selector.HashSelector
+import net.kuujo.vertigo.io.selector.FairSelector
+import net.kuujo.vertigo.io.selector.AllSelector
 
 class Config(object):
     """Base configuration."""
@@ -26,6 +31,14 @@ class NetworkConfig(Config):
     """Network configuration."""
     SCOPE_LOCAL = "local"
     SCOPE_CLUSTER = "cluster"
+
+    _SELECTORS = {
+      'round-robin': net.kuujo.vertigo.io.selector.RoundRobinSelector,
+      'random': net.kuujo.vertigo.io.selector.RandomSelector,
+      'hash': net.kuujo.vertigo.io.selector.HashSelector,
+      'fair': net.kuujo.vertigo.io.selector.FairSelector,
+      'all': net.kuujo.vertigo.io.selector.AllSelector,
+    }
 
     @property
     def name(self):
@@ -119,16 +132,20 @@ class NetworkConfig(Config):
         self.java_obj.removeComponent(name)
         return self
 
-    def create_connection(self, source, target):
+    def create_connection(self, source, target, selector=None):
         """Creates a connection between two components.
 
         Keyword arguments:
         @param source: A two-tuple indicating the source component name and output port.
         @param target: A two-tuple indicating the target component name and input port.
+        @param selector: A connection selector type.
 
-        @return: The connecion configuration.
+        @return: The connection configuration.
         """
-        return ConnectionConfig(self.java_obj.createConnection(source[0], source[1], target[0], target[1]))
+        if selector is not None:
+            return ConnectionConfig(self.java_obj.createConnection(source[0], source[1], target[0], target[1], self._SELECTORS[selector]))
+        else:
+            return ConnectionConfig(self.java_obj.createConnection(source[0], source[1], target[0], target[1]))
 
     def destroy_connection(self, source, target):
         """Destroys a connection between two components.
