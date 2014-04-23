@@ -14,5 +14,5 @@
 from vertigo import component, output
 
 @component.start_handler
-def start_handler(error, component):
+def start_handler(error):
     output.send('out', "Hello world!")

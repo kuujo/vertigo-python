@@ -392,7 +392,7 @@ this function will be called.
 from vertigo import component
 
 @component.start_handler
-def start_handler(error, component):
+def start_handler(error=None):
   if not error:
     print "Component started successfully!"
 ```
