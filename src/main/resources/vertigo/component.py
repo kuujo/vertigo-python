@@ -29,7 +29,7 @@ __started = None
 def __check_start():
     if __start_handler is not None and __started is not None:
         if __started.failed():
-            __start_handler(__started.cause(), None)
+            __start_handler(__started.cause())
         else:
             __start_handler(None)
 
