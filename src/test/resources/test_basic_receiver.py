@@ -16,5 +16,5 @@ from test import Test, Assert
 
 @input.message_handler(port='in')
 def message_handler(message):
-    Assert.equals("Hello world!", message)
+    Assert.equals("Hello world!", message['body'])
     Test.complete()

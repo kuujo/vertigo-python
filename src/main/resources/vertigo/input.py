@@ -14,6 +14,9 @@
 import sys, component
 import org.vertx.java.core.Handler
 from core.javautils import map_from_java
+import org.vertx.java.core.json.JsonObject
+import org.vertx.java.core.json.JsonArray
+from java.util import ArrayList
 
 if component._component is None:
     raise ImportError("Not a valid Vertigo component.")
@@ -186,4 +189,8 @@ class MessageHandler(org.vertx.java.core.Handler):
     def __init__(self, handler):
         self.handler = handler;
     def handle(self, message):
+        if isinstance(message, org.vertx.java.core.json.JsonArray):
+            message = ArrayList(message.toArray())
+        elif isinstance(message, org.vertx.java.core.json.JsonObject):
+            message = message.toMap()
         self.handler(map_from_java(message))
