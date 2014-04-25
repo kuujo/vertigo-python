@@ -31,6 +31,7 @@ class NetworkConfig(Config):
     """Network configuration."""
     SCOPE_LOCAL = "local"
     SCOPE_CLUSTER = "cluster"
+    SCOPE_XYNC = "xync"
 
     _SELECTORS = {
       'round-robin': net.kuujo.vertigo.io.selector.RoundRobinSelector,
