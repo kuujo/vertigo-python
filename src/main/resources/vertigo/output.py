@@ -54,7 +54,39 @@ def group(port, group, handler=None):
     @param group: The name of the group to create.
     @param handler: A handler to be called once the group has been created.
     """
-    return get_port(port).group(group, handler)
+    if handler is not None:
+        get_port(port).group(group, handler)
+        return this
+    else:
+        def wrap(f):
+            get_port(port).group(group, f)
+            return f
+        return wrap
+
+def send_queue_full(port):
+    """Checks if a send queue is full on a port.
+
+    @param port: The port to check.
+
+    @return: Indicates whether the queue is full.
+    """
+    return get_port(port).send_queue_full()
+
+def drain_handler(port, handler=None):
+    """Sets a drain handler on a port.
+
+    Keyword arguments:
+    @param port: The port on which to set the handler.
+    @param handler: The handler to set.
+    """
+    if handler is not None:
+        get_port(port).drain_handler(handler)
+        return this
+    else:
+        def wrap(f):
+            get_port(port).drain_handler(f)
+            return f
+        return wrap
 
 class Output(object):
     """Base output."""

@@ -11,11 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from vertigo import component
+from vertigo import input
 
-port = component.input.port('in')
-
-@port.group_handler('sentences')
+@input.group_handler(port='in', group='sentences')
 def sentences_handler(group):
     counts = []
 

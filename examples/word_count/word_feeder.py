@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import vertx
-from vertigo import component
+from vertigo import component, output
 
 @component.start_handler
-def start_handler(error, component):
+def start_handler(error=None):
     if not error:
         words = vertx.config['words']
 
         def do_send():
-            while not component.output.out.send_queue_full():
-                component.output.out.send(words[rand(len(words) - 1)])
-
-            @component.output.out.drain_handler
-            def drain_handler():
-                do_send()
+            while not output.port('out').send_queue_full():
+                output.port('out').send(words[rand(len(words)-1)])
+            output.port('out').drain_handler(do_send)
+        do_send()

@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import component
+import sys, component
 import org.vertx.java.core.Handler
 from core.javautils import map_from_java
 
 if component._component is None:
     raise ImportError("Not a valid Vertigo component.")
+
+this = sys.modules[__name__]
 
 _ports = {}
 
@@ -34,28 +36,58 @@ def port(name):
 
 get_port = port
 
-def message_handler(port):
+def message_handler(port, handler=None):
     """Registers a message handler for a port.
 
     Keyword arguments:
     @param port: The port for which to register the handler.
+    @param handler: The handler to register.
     """
-    def wrap(f):
-        get_port(port).message_handler(f)
-        return f
-    return wrap
+    if handler is not None:
+        get_port(port).message_handler(handler)
+        return this
+    else:
+        def wrap(f):
+            get_port(port).message_handler(f)
+            return f
+        return wrap
 
-def group_handler(port, group):
+def group_handler(port, group, handler=None):
     """Registers a group handler for a port.
 
     Keyword arguments:
     @param port: The port for which to register the handler.
     @param group: The name of the group for which to register the handler.
+    @param handler: The handler to register.
     """
-    def wrap(f):
-        get_port(port).group_handler(group, f)
-        return f
-    return wrap
+    if handler is not None:
+        get_port(port).group_handler(group, handler)
+        return this
+    else:
+        def wrap(f):
+            get_port(port).group_handler(group, f)
+            return f
+        return wrap
+
+def pause(port):
+    """Pauses a port.
+
+    @param port: The port to pause.
+
+    @return: The input module.
+    """
+    get_port(port).pause()
+    return this
+
+def resume(port):
+    """Resumes a port.
+
+    @param port: The port to resume.
+
+    @return: The input module.
+    """
+    get_port(port).resume()
+    return this
 
 class Input(object):
     """Base input."""

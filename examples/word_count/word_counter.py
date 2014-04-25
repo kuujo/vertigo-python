@@ -11,17 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from vertigo import component
+from vertigo import input, output
 
 counts = {}
 
-port = component.input.port('in')
-
-@port.message_handler
+@input.message_handler('in')
 def message_handler(word):
-    try:
-        counts[word]
-    except KeyError:
+    if word not in counts:
         counts[word] = 0
     counts[word] += 1
-    component.output.port('out').send((word, counts[word]))
+    output.send('out', (word, counts[word]))
