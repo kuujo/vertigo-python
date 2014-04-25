@@ -13,8 +13,8 @@
 # limitations under the License.
 import org.vertx.java.core.AsyncResultHandler
 from core.javautils import map_from_java, map_to_java
-import net.kuujo.vertigo.network.ModuleConfig
-import net.kuujo.vertigo.network.VerticleConfig
+import net.kuujo.vertigo.component.ModuleConfig
+import net.kuujo.vertigo.component.VerticleConfig
 import net.kuujo.vertigo.cluster.ClusterScope
 import net.kuujo.vertigo.io.selector.RoundRobinSelector
 import net.kuujo.vertigo.io.selector.RandomSelector
