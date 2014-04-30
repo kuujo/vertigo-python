@@ -13,10 +13,7 @@
 # limitations under the License.
 import sys, component
 import org.vertx.java.core.Handler
-from core.javautils import map_to_java
-from types import TupleType, ListType, DictType
-import org.vertx.java.core.json.JsonArray
-import org.vertx.java.core.json.JsonObject
+from core.javautils import map_to_vertx
 
 if component._component is None:
     raise ImportError("Not a valid Vertigo component.")
@@ -140,15 +137,7 @@ class Output(object):
 
         @return: self
         """
-        if message is None:
-            return self
-        t = type(message)
-        if t == TupleType or t == ListType:
-            self.java_obj.send(org.vertx.java.core.json.JsonArray(map_to_java(message)))
-        elif t == DictType:
-            self.java_obj.send(org.vertx.java.core.json.JsonObject(map_to_java(message)))
-        else:
-            self.java_obj.send(map_to_java(message))
+        self.java_obj.send(map_to_vertx(message))
         return self
 
 class OutputPort(Output):
