@@ -13,7 +13,15 @@
 # limitations under the License.
 import sys, component
 import org.vertx.java.core.Handler
-from core.javautils import map_to_vertx
+from java.lang import (
+    Long,
+    Double,
+    Integer
+)
+from core.buffer import Buffer
+import org.vertx.java.core.json.JsonObject
+import org.vertx.java.core.json.JsonArray
+from core.javautils import map_to_java, map_seq_to_java, map_dict_to_java
 
 if component._component is None:
     raise ImportError("Not a valid Vertigo component.")
@@ -165,3 +173,21 @@ class DrainHandler(org.vertx.java.core.Handler):
         self.handler = handler;
     def handle(self, nothing):
         self.handler()
+
+def map_to_vertx(value):
+    """Converts a Jython type to a Vert.x type."""
+    if value is None:
+        return value
+    if isinstance(value, (list, tuple)):
+        return org.vertx.java.core.json.JsonArray(map_seq_to_java(value))
+    elif isinstance(value, dict):
+        return org.vertx.java.core.json.JsonObject(map_dict_to_java(value))
+    elif isinstance(value, Buffer):
+        return value._to_java_buffer()
+    elif isinstance(value, long):
+        return Long(value)
+    elif isinstance(value, float):
+        return Double(value)
+    elif isinstance(value, int):
+        return Integer(value)
+    return map_to_java(value)

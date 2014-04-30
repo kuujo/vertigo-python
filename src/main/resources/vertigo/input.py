@@ -13,7 +13,16 @@
 # limitations under the License.
 import sys, component
 import org.vertx.java.core.Handler
-from core.javautils import map_from_vertx
+from core.buffer import Buffer
+import org.vertx.java.core.json.JsonObject
+import org.vertx.java.core.json.JsonArray
+import org.vertx.java.core.buffer.Buffer
+from java.util import (
+    Map,
+    Set,
+    Collection
+)
+from core.javautils import map_map_from_java, map_set_from_java, map_collection_from_java
 
 if component._component is None:
     raise ImportError("Not a valid Vertigo component.")
@@ -187,3 +196,33 @@ class MessageHandler(org.vertx.java.core.Handler):
         self.handler = handler;
     def handle(self, message):
         self.handler(map_from_vertx(message))
+
+def map_array_from_java(array):
+    """Converts a JsonArray to a list."""
+    result = []
+    iter = array.iterator()
+    while iter.hasNext():
+        result.append(map_from_vertx(iter.next()))
+    return result
+
+def map_object_from_java(obj):
+    """Converts a JsonObject to a dictionary."""
+    return map_map_from_java(obj.toMap())
+
+def map_from_vertx(value):
+    """Converts a Vert.x type to a Jython type."""
+    if value is None:
+        return value
+    if isinstance(value, Map):
+        return map_map_from_java(value)
+    elif isinstance(value, Set):
+        return map_set_from_java(value)
+    elif isinstance(value, Collection):
+        return map_collection_from_java(value)
+    elif isinstance(value, org.vertx.java.core.json.JsonObject):
+        return map_object_from_java(value)
+    elif isinstance(value, org.vertx.java.core.json.JsonArray):
+        return map_array_from_java(value)
+    elif isinstance(value, org.vertx.java.core.buffer.Buffer):
+        return Buffer(value)
+    return value

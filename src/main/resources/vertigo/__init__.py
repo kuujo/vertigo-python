@@ -30,7 +30,7 @@ def create_network(network):
     @return: A new network instance.
     """
     if isinstance(network, dict):
-        return NetworkConfig(_vertigo.createNetwork(map_to_java(network)))
+        return NetworkConfig(org.vertx.java.core.json.JsonObject(_vertigo.createNetwork(map_to_java(network))))
     return NetworkConfig(_vertigo.createNetwork(network))
 
 def deploy_network(network, handler=None):
@@ -44,6 +44,8 @@ def deploy_network(network, handler=None):
 
     @return: The current vertigo instance.
     """
+    if isinstance(network, dict):
+        network = _vertigo.createNetwork(org.vertx.java.core.json.JsonObject(map_to_java(network)))
     if handler is not None:
         _vertigo.deployNetwork(network if isinstance(network, basestring) else network.java_obj, _DeployHandler(handler))
     else:
@@ -61,6 +63,8 @@ def undeploy_network(network, handler=None):
 
     @return: The current vertigo instance.
     """
+    if isinstance(network, dict):
+        network = _vertigo.createNetwork(org.vertx.java.core.json.JsonObject(map_to_java(network)))
     if handler is not None:
         _vertigo.undeployNetwork(network if isinstance(network, basestring) else network.java_obj, _UndeployHandler(handler))
     else:

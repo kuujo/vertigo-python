@@ -28,9 +28,6 @@ class Config(object):
 
 class NetworkConfig(Config):
     """Network configuration."""
-    SCOPE_LOCAL = "local"
-    SCOPE_CLUSTER = "cluster"
-    SCOPE_XYNC = "xync"
 
     _SELECTORS = {
       'round-robin': net.kuujo.vertigo.io.selector.RoundRobinSelector,
@@ -45,16 +42,10 @@ class NetworkConfig(Config):
         """Returns the network name."""
         return self.java_obj.getName()
 
-    def get_scope(self):
-        """Returns the network scope."""
-        return self.java_obj.getScope().toString()
-
-    def set_scope(self, scope):
-        """Sets the network scope."""
-        self.java_obj.setScope(net.kuujo.vertigo.cluster.ClusterScope.parse(scope))
-        return self
-
-    scope = property(get_scope, set_scope)
+    @property
+    def cluster(self):
+        """Returns the cluster configuration."""
+        return ClusterConfig(self.java_obj.getClusterConfig())
 
     def add_component(self, name, main, config=None, instances=1):
         """Adds a component to the network.
@@ -158,6 +149,33 @@ class NetworkConfig(Config):
         """
         self.java_obj.destroyConnection(source[0] if isinstance(source, tuple) else source, target[0] if isinstance(target, tuple) else target)
         return self
+
+class ClusterConfig(Config):
+    """Cluster configuration."""
+    SCOPE_LOCAL = "local"
+    SCOPE_CLUSTER = "cluster"
+
+    def get_address(self):
+        """Returns the cluster address."""
+        return self.java_obj.getAddress()
+
+    def set_address(self, address):
+        """Sets the cluster address."""
+        self.java_obj.setAddress(address)
+        return self
+
+    address = property(get_address, set_address)
+
+    def get_scope(self):
+        """Returns the network scope."""
+        return self.java_obj.getScope().toString()
+
+    def set_scope(self, scope):
+        """Sets the network scope."""
+        self.java_obj.setScope(net.kuujo.vertigo.cluster.ClusterScope.parse(scope))
+        return self
+
+    scope = property(get_scope, set_scope)
 
 class ComponentConfig(Config):
     """Component configuration."""
