@@ -30,7 +30,7 @@ def is_deployed(self, deployment_id, handler):
     component._component.cluster().isDeployed(name, DeployHandler(handler))
     return self
 
-def deploy_module(self, deployment_id, module, config=None, instances=1, handler=None):
+def deploy_module(self, deployment_id, module, config=None, instances=1, ha=False, handler=None):
     """Deploys a module.
 
     Keyword arguments:
@@ -38,14 +38,15 @@ def deploy_module(self, deployment_id, module, config=None, instances=1, handler
     @param module: The name of the module to deploy.
     @param config: The module configuration.
     @param instances: The number of instances to deploy.
+    @param ha: Whether to deploy the module with HA.
     @param handler: An asynchronous handler to be called once deployment is complete.
 
     @return: self
     """
-    component._component.cluster().deployModule(deployment_id, module, map_to_java(config) if config is not None else None, instances, DeployHandler(handler) if handler is not None else None)
+    component._component.cluster().deployModule(deployment_id, module, map_to_java(config) if config is not None else None, instances, ha, DeployHandler(handler) if handler is not None else None)
     return self
 
-def deploy_module_to(self, deployment_id, group_id, module, config=None, instances=1, handler=None):
+def deploy_module_to(self, deployment_id, group_id, module, config=None, instances=1, ha=False, handler=None):
     """Deploys a module to a specific HA group.
 
     Keyword arguments:
@@ -54,14 +55,15 @@ def deploy_module_to(self, deployment_id, group_id, module, config=None, instanc
     @param module: The name of the module to deploy.
     @param config: The module configuration.
     @param instances: The number of instances to deploy.
+    @param ha: Whether to deploy the module with HA.
     @param handler: An asynchronous handler to be called once deployment is complete.
 
     @return: self
     """
-    component._component.cluster().deployModuleTo(deployment_id, group_id, module, map_to_java(config) if config is not None else None, instances, DeployHandler(handler) if handler is not None else None)
+    component._component.cluster().deployModuleTo(deployment_id, group_id, module, map_to_java(config) if config is not None else None, instances, ha, DeployHandler(handler) if handler is not None else None)
     return self
 
-def deploy_verticle(self, deployment_id, main, config=None, instances=1, handler=None):
+def deploy_verticle(self, deployment_id, main, config=None, instances=1, ha=False, handler=None):
     """Deploys a verticle.
 
     Keyword arguments:
@@ -69,14 +71,15 @@ def deploy_verticle(self, deployment_id, main, config=None, instances=1, handler
     @param module: The verticle main.
     @param config: The verticle configuration.
     @param instances: The number of instances to deploy.
+    @param ha: Whether to deploy the verticle with HA.
     @param handler: An asynchronous handler to be called once deployment is complete.
 
     @return: self
     """
-    component._component.cluster().deployVerticle(deployment_id, main, map_to_java(config) if config is not None else None, instances, DeployHandler(handler) if handler is not None else None)
+    component._component.cluster().deployVerticle(deployment_id, main, map_to_java(config) if config is not None else None, instances, ha, DeployHandler(handler) if handler is not None else None)
     return self
 
-def deploy_verticle_to(self, deployment_id, group_id, main, config=None, instances=1, handler=None):
+def deploy_verticle_to(self, deployment_id, group_id, main, config=None, instances=1, ha=False, handler=None):
     """Deploys a verticle to a specific HA group.
 
     Keyword arguments:
@@ -85,14 +88,15 @@ def deploy_verticle_to(self, deployment_id, group_id, main, config=None, instanc
     @param main: The verticle main.
     @param config: The verticle configuration.
     @param instances: The number of instances to deploy.
+    @param ha: Whether to deploy the verticle with HA.
     @param handler: An asynchronous handler to be called once deployment is complete.
 
     @return: self
     """
-    component._component.cluster().deployVerticleTo(deployment_id, group_id, main, map_to_java(config) if config is not None else None, instances, DeployHandler(handler) if handler is not None else None)
+    component._component.cluster().deployVerticleTo(deployment_id, group_id, main, map_to_java(config) if config is not None else None, instances, ha, DeployHandler(handler) if handler is not None else None)
     return self
 
-def deploy_worker_verticle(self, deployment_id, main, config=None, instances=1, multi_threaded=False, handler=None):
+def deploy_worker_verticle(self, deployment_id, main, config=None, instances=1, multi_threaded=False, ha=False, handler=None):
     """Deploys a verticle.
 
     Keyword arguments:
@@ -101,14 +105,15 @@ def deploy_worker_verticle(self, deployment_id, main, config=None, instances=1, 
     @param config: The verticle configuration.
     @param instances: The number of instances to deploy.
     @param multi_threaded: Whether the worker verticle is multi-threaded.
+    @param ha: Whether to deploy the verticle with HA.
     @param handler: An asynchronous handler to be called once deployment is complete.
 
     @return: self
     """
-    component._component.cluster().deployWorkerVerticle(deployment_id, main, map_to_java(config) if config is not None else None, instances, multi_threaded, DeployHandler(handler) if handler is not None else None)
+    component._component.cluster().deployWorkerVerticle(deployment_id, main, map_to_java(config) if config is not None else None, instances, multi_threaded, ha, DeployHandler(handler) if handler is not None else None)
     return self
 
-def deploy_worker_verticle_to(self, deployment_id, group_id, main, config=None, instances=1, multi_threaded=False, handler=None):
+def deploy_worker_verticle_to(self, deployment_id, group_id, main, config=None, instances=1, multi_threaded=False, ha=False, handler=None):
     """Deploys a worker verticle to a specific HA group.
 
     Keyword arguments:
@@ -118,11 +123,12 @@ def deploy_worker_verticle_to(self, deployment_id, group_id, main, config=None, 
     @param config: The verticle configuration.
     @param instances: The number of instances to deploy.
     @param multi_threaded: Whether the worker verticle is multi-threaded.
+    @param ha: Whether to deploy the verticle with HA.
     @param handler: An asynchronous handler to be called once deployment is complete.
 
     @return: self
     """
-    component._component.cluster().deployWorkerVerticleTo(deployment_id, group_id, main, map_to_java(config) if config is not None else None, instances, multi_threaded, DeployHandler(handler) if handler is not None else None)
+    component._component.cluster().deployWorkerVerticleTo(deployment_id, group_id, main, map_to_java(config) if config is not None else None, instances, multi_threaded, ha, DeployHandler(handler) if handler is not None else None)
     return self
 
 def undeploy_module(self, deployment_id, handler=None):
