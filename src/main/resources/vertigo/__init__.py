@@ -14,6 +14,7 @@
 import sys
 import net.kuujo.vertigo.Vertigo
 import org.vertx.java.platform.impl.JythonVerticleFactory
+import org.vertx.java.core.json.JsonObject
 from core.javautils import map_to_java
 from network import NetworkConfig, ActiveNetwork
 
