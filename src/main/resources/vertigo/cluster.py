@@ -18,6 +18,8 @@ import org.vertx.java.core.AsyncResultHandler
 if component._component is None:
     raise ImportError("Not a valid Vertigo component.")
 
+address = component._component.cluster().address()
+
 def is_deployed(self, deployment_id, handler):
     """Checks whether a deployment is deployed.
 

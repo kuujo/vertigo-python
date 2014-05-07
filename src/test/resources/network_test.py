@@ -36,9 +36,12 @@ class NetworkTestCase(TestCase):
         network.add_verticle('sender', main='test_basic_sender.py')
         network.add_verticle('receiver', main='test_basic_receiver.py')
         network.create_connection(('sender', 'out'), ('receiver', 'in'))
-        def handler(error, network):
+        def cluster_handler(error, cluster):
             self.assert_null(error)
-        vertigo.deploy_network(network, handler)
+            def deploy_handler(error, network):
+                self.assert_null(error)
+            cluster.deploy_network(network, handler=deploy_handler)
+        vertigo.deploy_cluster('test_basic_send', handler=cluster_handler)
 
     def test_group_send(self):
         """Test sending a basic message between two components."""
@@ -46,8 +49,11 @@ class NetworkTestCase(TestCase):
         network.add_verticle('sender', main='test_group_sender.py')
         network.add_verticle('receiver', main='test_group_receiver.py')
         network.create_connection(('sender', 'out'), ('receiver', 'in'))
-        def handler(error, network):
+        def cluster_handler(error, cluster):
             self.assert_null(error)
-        vertigo.deploy_network(network, handler)
+            def deploy_handler(error, network):
+                self.assert_null(error)
+            cluster.deploy_network(network, handler=deploy_handler)
+        vertigo.deploy_cluster('test_basic_send', handler=cluster_handler)
 
 run_test(NetworkTestCase())
