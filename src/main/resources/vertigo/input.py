@@ -61,6 +61,22 @@ def message_handler(port, handler=None):
             return f
         return wrap
 
+def batch_handler(port, handler=None):
+    """Registers a batch handler for a port.
+
+    Keyword arguments:
+    @param port: The port for which to register the handler.
+    @param handler: The handler to register.
+    """
+    if handler is not None:
+        get_port(port).batch_handler(handler)
+        return this
+    else:
+        def wrap(f):
+            get_port(port).batch_handler(f)
+            return f
+        return wrap
+
 def group_handler(port, group, handler=None):
     """Registers a group handler for a port.
 
@@ -103,11 +119,6 @@ class Input(object):
     def __init__(self, java_obj):
         self.java_obj = java_obj
 
-    @property
-    def name(self):
-        """Returns the input name."""
-        return self.java_obj.name()
-
     def pause(self):
         """Pauses the input."""
         self.java_obj.pause()
@@ -148,6 +159,55 @@ class Input(object):
 
 class InputPort(Input):
     """Input port."""
+    @property
+    def name(self):
+        """Returns the port name."""
+        return self.java_obj.name()
+
+    def batch_handler(self, handler=None):
+        """Sets a batch handler on the port.
+
+        Keyword arguments:
+        @param handler: A handler to be called when a batch is received.
+
+        @return: self
+        """
+        if handler is None:
+            def wrap(handler):
+                self.java_obj.batchHandler(name, BatchHandler(handler))
+            return wrap
+        else:
+            self.java_obj.batchHandler(BatchHandler(handler))
+            return self
+
+class InputBatch(Input):
+    """Input batch."""
+    @property
+    def id(self):
+        """Returns the unique batch ID."""
+        return self.java_obj.id()
+
+    def start_handler(self, handler):
+        """Sets a start handler on the batch.
+
+        Keyword arguments:
+        @param handler: A handler to be called when the batch is started.
+
+        @return: self
+        """
+        self.java_obj.startHandler(VoidHandler(handler))
+        return self
+
+    def end_handler(self, handler):
+        """Sets an end handler on the batch.
+
+        Keyword arguments:
+        @param handler: A handler to be called when the batch has ended.
+
+        @return: self
+        """
+        self.java_obj.endHandler(VoidHandler(handler))
+        return self
 
 class InputGroup(Input):
     """Input group."""
@@ -155,6 +215,11 @@ class InputGroup(Input):
     def id(self):
         """Returns the unique group ID."""
         return self.java_obj.id()
+
+    @property
+    def name(self):
+        """Returns the group name."""
+        return self.java_obj.name()
 
     def start_handler(self, handler):
         """Sets a start handler on the group.
@@ -168,7 +233,7 @@ class InputGroup(Input):
         return self
 
     def end_handler(self, handler):
-        """Sets an end handler on the gorup.
+        """Sets an end handler on the group.
 
         Keyword arguments:
         @param handler: A handler to be called when the group has ended.
@@ -184,6 +249,12 @@ class VoidHandler(org.vertx.java.core.Handler):
     def handle(self, void=None):
         if self.handler is not None:
             self.handler()
+
+class BatchHandler(org.vertx.java.core.Handler):
+    def __init__(self, handler):
+        self.handler = handler
+    def handle(self, batch):
+        self.handler(InputBatch(batch))
 
 class GroupHandler(org.vertx.java.core.Handler):
     def __init__(self, handler):

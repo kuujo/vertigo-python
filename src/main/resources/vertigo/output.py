@@ -54,6 +54,22 @@ def send(port, message):
     get_port(port).send(message)
     return this
 
+def batch(port, handler=None):
+    """Creates a batch for a specific port.
+
+    Keyword arguments:
+    @param port: The port for which to create the batch.
+    @param handler: A handler to be called once the batch has been created.
+    """
+    if handler is not None:
+        get_port(port).batch(handler)
+        return this
+    else:
+        def wrap(f):
+            get_port(port).batch(f)
+            return f
+        return wrap
+
 def group(port, group, handler=None):
     """Creates a group for a specific port.
 
@@ -130,8 +146,8 @@ class Output(object):
         @return: self
         """
         if handler is None:
-            def wrap(func):
-                self.java_obj.group(name, GroupHandler(func))
+            def wrap(f):
+                self.java_obj.group(name, GroupHandler(f))
             return wrap
         else:
             self.java_obj.group(name, GroupHandler(handler))
@@ -150,9 +166,29 @@ class Output(object):
 
 class OutputPort(Output):
     """Output port."""
+    @property
+    def name(self):
+        """Returns the port name."""
+        return self.java_obj.name()
 
-class OutputGroup(Output):
-    """Output group."""
+    def batch(self, handler=None):
+        """Creates an output batch.
+
+        Keyword arguments:
+        @param handler: A handler to be called once the batch is created.
+
+        @return: self
+        """
+        if handler is None:
+            def wrap(f):
+                self.java_obj.batch(BatchHandler(f))
+            return wrap
+        else:
+            self.java_obj.batch(BatchHandler(handler))
+        return self
+
+class OutputBatch(Output):
+    """Output batch."""
     @property
     def id(self):
         """Returns the unique group identifier."""
@@ -161,6 +197,28 @@ class OutputGroup(Output):
     def end(self):
         """Ends the output group."""
         self.java_obj.end()
+
+class OutputGroup(Output):
+    """Output group."""
+    @property
+    def id(self):
+        """Returns the unique group identifier."""
+        return self.java_obj.id()
+
+    @property
+    def name(self):
+        """Returns the group name."""
+        return self.java_obj.name()
+
+    def end(self):
+        """Ends the output group."""
+        self.java_obj.end()
+
+class BatchHandler(org.vertx.java.core.Handler):
+    def __init__(self, handler):
+        self.handler = handler
+    def handle(self, batch):
+        self.handler(OutputBatch(batch))
 
 class GroupHandler(org.vertx.java.core.Handler):
     def __init__(self, handler):
