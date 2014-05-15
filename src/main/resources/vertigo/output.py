@@ -248,4 +248,4 @@ def map_to_vertx(value):
         return Double(value)
     elif isinstance(value, int):
         return Integer(value)
-    return map_to_java(value)
+    return value
